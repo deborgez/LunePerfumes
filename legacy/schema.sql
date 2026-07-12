@@ -29,6 +29,7 @@ create table if not exists perfumes (
   id bigint generated always as identity primary key,
   nome text not null,
   marca text not null,
+  genero text not null default 'compartilhavel' check (genero in ('feminino', 'masculino', 'compartilhavel')),
   ml numeric not null,
   preco numeric not null default 0,
   receita jsonb not null default '[]'::jsonb,

@@ -8,18 +8,8 @@ import EssenciaModal from '@/components/essencias/EssenciaModal';
 import ReporModal from '@/components/shared/ReporModal';
 import { fmt, fq } from '@/lib/format';
 import { sortByEstoqueAsc } from '@/lib/business';
-import type { Essencia, Genero } from '@/lib/types';
-
-const GENERO_LABEL: Record<Genero, string> = {
-  feminino: 'Feminino',
-  masculino: 'Masculino',
-  compartilhavel: 'Compartilhável',
-};
-const GENERO_COLOR: Record<Genero, 'red' | 'purple' | 'gray'> = {
-  feminino: 'red',
-  masculino: 'purple',
-  compartilhavel: 'gray',
-};
+import { GENERO_COLOR, GENERO_LABEL } from '@/lib/genero';
+import type { Essencia } from '@/lib/types';
 
 export default function EssenciasPage() {
   const { essencias, deleteEssencia } = useData();

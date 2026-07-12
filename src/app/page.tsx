@@ -1,6 +1,6 @@
 'use client';
 
-import { IconCash, IconClock, IconTrendingUp, IconChartBar, IconFlask, IconPackage } from '@tabler/icons-react';
+import { IconCash, IconClock, IconTrendingUp, IconChartBar, IconFlask, IconPackage, IconDroplet } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
 import { StatCard, Card, CardHeader } from '@/components/shared/ui';
 import RevenueChart from '@/components/dashboard/RevenueChart';
@@ -8,10 +8,16 @@ import PrazoList from '@/components/dashboard/PrazoList';
 import StockBars from '@/components/dashboard/StockBars';
 import { fmt } from '@/lib/format';
 import { ESSENCIA_ESTOQUE_REF, sortByEstoqueAsc } from '@/lib/business';
+import { GENEROS, GENERO_LABEL } from '@/lib/genero';
 
 export default function DashboardPage() {
   const { vendas, essencias, insumos, perfumes } = useData();
   const essenciasOrdenadas = sortByEstoqueAsc(essencias);
+  const porGenero = GENEROS.map((g) => ({
+    genero: g,
+    label: GENERO_LABEL[g],
+    qtd: perfumes.filter((p) => p.genero === g).length,
+  }));
 
   let cx = 0,
     lu = 0,
@@ -47,6 +53,16 @@ export default function DashboardPage() {
         <StatCard label="Lucro" value={fmt(lu)} icon={<IconTrendingUp size={14} />} sub="vendas pagas" color="purple" />
         <StatCard label="Faturamento" value={fmt(tot)} icon={<IconChartBar size={14} />} sub={`${vendas.length} vendas`} />
       </div>
+
+      <Card className="mb-3.5">
+        <CardHeader title="Perfumes cadastrados" icon={<IconDroplet size={17} />} />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {porGenero.map((g) => (
+            <StatCard key={g.genero} label={g.label} value={g.qtd.toString()} icon={<IconDroplet size={14} />} sub="cadastrados" />
+          ))}
+          <StatCard label="Total" value={perfumes.length.toString()} icon={<IconDroplet size={14} />} sub="perfumes" color="purple" />
+        </div>
+      </Card>
 
       <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <Card>

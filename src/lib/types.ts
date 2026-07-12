@@ -39,6 +39,7 @@ export interface Perfume {
   id: number;
   nome: string;
   marca: string;
+  genero: Genero;
   ml: number;
   preco: number;
   receita: ReceitaItem[];

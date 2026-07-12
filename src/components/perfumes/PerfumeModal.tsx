@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Modal from '@/components/shared/Modal';
-import { Btn, FormGroup, Input } from '@/components/shared/ui';
+import { Btn, FormGroup, Input, Select } from '@/components/shared/ui';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { br, fmt } from '@/lib/format';
 import { allItems, gi } from '@/lib/business';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
-import type { Perfume, ReceitaItem } from '@/lib/types';
+import type { Genero, Perfume, ReceitaItem } from '@/lib/types';
 
 interface PerfumeModalProps {
   open: boolean;
@@ -21,6 +21,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
   const toast = useToast();
   const [nome, setNome] = useState('');
   const [marca, setMarca] = useState('');
+  const [genero, setGenero] = useState<Genero>('compartilhavel');
   const [ml, setMl] = useState('');
   const [preco, setPreco] = useState('');
   const [recRows, setRecRows] = useState<ReceitaItem[]>([]);
@@ -34,6 +35,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
     if (editing) {
       setNome(editing.nome);
       setMarca(editing.marca);
+      setGenero(editing.genero || 'compartilhavel');
       setMl(editing.ml.toString());
       setPreco(editing.preco.toFixed(2).replace('.', ','));
       const rec: ReceitaItem[] = Array.isArray(editing.receita)
@@ -43,6 +45,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
     } else {
       setNome('');
       setMarca('');
+      setGenero('compartilhavel');
       setMl('');
       setPreco('');
       setRecRows([]);
@@ -89,6 +92,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
     const ok = await savePerfume(editing ? editing.id : null, {
       nome: nomeT,
       marca: marcaT,
+      genero,
       ml: mlN,
       preco: precoV,
       receita: recRows.map((r) => ({ tipo: r.tipo, itemId: r.itemId, qtd: r.qtd })),
@@ -128,6 +132,15 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
         </FormGroup>
         <FormGroup label="Preço de venda (R$)">
           <Input inputMode="decimal" placeholder="89,90" value={preco} onChange={(e) => setPreco(e.target.value)} />
+        </FormGroup>
+      </div>
+      <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
+        <FormGroup label="Gênero">
+          <Select value={genero} onChange={(e) => setGenero(e.target.value as Genero)}>
+            <option value="feminino">Feminino</option>
+            <option value="masculino">Masculino</option>
+            <option value="compartilhavel">Compartilhável</option>
+          </Select>
         </FormGroup>
       </div>
 

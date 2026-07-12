@@ -5,7 +5,7 @@ import { useToast } from './ToastContext';
 import * as q from '@/lib/queries';
 import { custo1 } from '@/lib/business';
 import { tod } from '@/lib/format';
-import type { Essencia, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
+import type { Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
 
 type SyncStatus = 'spin' | 'ok' | 'err';
 
@@ -34,7 +34,7 @@ interface DataContextValue {
 
   savePerfume: (
     id: number | null,
-    body: { nome: string; marca: string; ml: number; preco: number; receita: ReceitaItem[] }
+    body: { nome: string; marca: string; genero: Genero; ml: number; preco: number; receita: ReceitaItem[] }
   ) => Promise<boolean>;
   deletePerfume: (id: number) => Promise<void>;
 
@@ -167,7 +167,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   async function savePerfume(
     id: number | null,
-    body: { nome: string; marca: string; ml: number; preco: number; receita: ReceitaItem[] }
+    body: { nome: string; marca: string; genero: Genero; ml: number; preco: number; receita: ReceitaItem[] }
   ) {
     try {
       if (id) {

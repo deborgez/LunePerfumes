@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Essencia, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from './types';
+import type { Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from './types';
 
 export async function getEssencias(): Promise<Essencia[]> {
   const { data, error } = await supabase.from('essencias').select('*').order('created_at', { ascending: true });
@@ -55,6 +55,7 @@ export async function deleteInsumo(id: number): Promise<void> {
 export async function createPerfume(body: {
   nome: string;
   marca: string;
+  genero: Genero;
   ml: number;
   preco: number;
   receita: ReceitaItem[];
@@ -65,7 +66,7 @@ export async function createPerfume(body: {
 }
 export async function updatePerfume(
   id: number,
-  body: { nome: string; marca: string; ml: number; preco: number; receita: ReceitaItem[] }
+  body: { nome: string; marca: string; genero: Genero; ml: number; preco: number; receita: ReceitaItem[] }
 ): Promise<Perfume> {
   const { data, error } = await supabase.from('perfumes').update(body).eq('id', id).select();
   if (error) throw error;
