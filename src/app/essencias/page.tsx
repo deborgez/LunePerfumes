@@ -7,7 +7,18 @@ import { Btn, Card, CardHeader, Badge } from '@/components/shared/ui';
 import EssenciaModal from '@/components/essencias/EssenciaModal';
 import ReporModal from '@/components/shared/ReporModal';
 import { fmt, fq } from '@/lib/format';
-import type { Essencia } from '@/lib/types';
+import type { Essencia, Genero } from '@/lib/types';
+
+const GENERO_LABEL: Record<Genero, string> = {
+  feminino: 'Feminino',
+  masculino: 'Masculino',
+  compartilhavel: 'Compartilhável',
+};
+const GENERO_COLOR: Record<Genero, 'red' | 'purple' | 'gray'> = {
+  feminino: 'red',
+  masculino: 'purple',
+  compartilhavel: 'gray',
+};
 
 export default function EssenciasPage() {
   const { essencias, deleteEssencia } = useData();
@@ -51,7 +62,7 @@ export default function EssenciasPage() {
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr>
-                {['Nome', 'Fornecedor', 'Estoque', 'Custo global', 'Custo/ml', 'Ações'].map((h) => (
+                {['Nome', 'Marca', 'Gênero', 'Fornecedor', 'Estoque', 'Custo global', 'Custo/ml', 'Ações'].map((h) => (
                   <th
                     key={h}
                     className="whitespace-nowrap border-b border-[var(--border)] bg-[var(--tbl-head)] px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[var(--text-hint)]"
@@ -64,7 +75,7 @@ export default function EssenciasPage() {
             <tbody>
               {!essencias.length ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-[13px] text-[var(--text-hint)]">
+                  <td colSpan={8} className="p-8 text-center text-[13px] text-[var(--text-hint)]">
                     <IconFlask size={24} className="mx-auto mb-1.5" />
                     Nenhuma essência
                   </td>
@@ -74,6 +85,10 @@ export default function EssenciasPage() {
                   <tr key={e.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
                     <td className="px-3 py-2.5 text-[var(--text)]">
                       <strong>{e.nome}</strong>
+                    </td>
+                    <td className="px-3 py-2.5 text-[var(--text)]">{e.marca || '—'}</td>
+                    <td className="px-3 py-2.5">
+                      <Badge color={GENERO_COLOR[e.genero]}>{GENERO_LABEL[e.genero]}</Badge>
                     </td>
                     <td className="px-3 py-2.5 text-[var(--text)]">{e.fornecedor || '—'}</td>
                     <td className="px-3 py-2.5 text-[var(--text)]">{fq(e.estoque, 'ml')}</td>
@@ -111,9 +126,14 @@ export default function EssenciasPage() {
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     <div className="text-sm font-semibold text-[var(--text)]">{e.nome}</div>
-                    <div className="mt-[3px] text-xs text-[var(--text-muted)]">{e.fornecedor || 'Sem fornecedor'}</div>
+                    <div className="mt-[3px] text-xs text-[var(--text-muted)]">
+                      {e.marca || 'Sem marca'} · {e.fornecedor || 'Sem fornecedor'}
+                    </div>
                   </div>
-                  <Badge color="purple">{fmt(e.unit)}/ml</Badge>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge color="purple">{fmt(e.unit)}/ml</Badge>
+                    <Badge color={GENERO_COLOR[e.genero]}>{GENERO_LABEL[e.genero]}</Badge>
+                  </div>
                 </div>
                 <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                   <div>

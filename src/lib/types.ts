@@ -2,10 +2,13 @@ export type ItemTipo = 'essencia' | 'insumo';
 export type InsumoTipo = 'ml' | 'un';
 export type VendaTipo = 'avista' | 'prazo';
 export type VendaStatus = 'pago' | 'pendente';
+export type Genero = 'feminino' | 'masculino' | 'compartilhavel';
 
 export interface Essencia {
   id: number;
   nome: string;
+  marca: string | null;
+  genero: Genero;
   fornecedor: string | null;
   estoque: number;
   estoque_inicial: number;

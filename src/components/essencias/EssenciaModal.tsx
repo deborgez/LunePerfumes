@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Modal from '@/components/shared/Modal';
-import { Btn, FormGroup, Hint, Input } from '@/components/shared/ui';
+import { Btn, FormGroup, Hint, Input, Select } from '@/components/shared/ui';
 import { br, fmt } from '@/lib/format';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
-import type { Essencia } from '@/lib/types';
+import type { Essencia, Genero } from '@/lib/types';
 
 interface EssenciaModalProps {
   open: boolean;
@@ -18,6 +18,8 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
   const { saveEssencia } = useData();
   const toast = useToast();
   const [nome, setNome] = useState('');
+  const [marca, setMarca] = useState('');
+  const [genero, setGenero] = useState<Genero>('compartilhavel');
   const [forn, setForn] = useState('');
   const [est, setEst] = useState('');
   const [cst, setCst] = useState('');
@@ -28,11 +30,15 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
     /* eslint-disable react-hooks/set-state-in-effect -- reinitialize form fields when modal opens for create/edit */
     if (editing) {
       setNome(editing.nome);
+      setMarca(editing.marca || '');
+      setGenero(editing.genero || 'compartilhavel');
       setForn(editing.fornecedor || '');
       setEst(editing.estoque.toString());
       setCst(editing.custo.toFixed(2).replace('.', ','));
     } else {
       setNome('');
+      setMarca('');
+      setGenero('compartilhavel');
       setForn('');
       setEst('');
       setCst('');
@@ -46,6 +52,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
 
   async function handleSave() {
     const nomeT = nome.trim();
+    const marcaT = marca.trim();
     const fornT = forn.trim();
     if (!nomeT || estN <= 0 || cstN <= 0) {
       toast('Preencha todos os campos', 'err');
@@ -54,6 +61,8 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
     setSaving(true);
     const ok = await saveEssencia(editing ? editing.id : null, {
       nome: nomeT,
+      marca: marcaT,
+      genero,
       fornecedor: fornT,
       estoque: estN,
       estoque_inicial: editing ? editing.estoque_inicial : estN,
@@ -84,8 +93,20 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
         <FormGroup label="Nome da essência">
           <Input placeholder="Ex: Oud, Vanilla..." value={nome} onChange={(e) => setNome(e.target.value)} />
         </FormGroup>
+        <FormGroup label="Marca (opcional)">
+          <Input placeholder="Ex: Drom, Firmenich..." value={marca} onChange={(e) => setMarca(e.target.value)} />
+        </FormGroup>
+      </div>
+      <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
+        <FormGroup label="Gênero">
+          <Select value={genero} onChange={(e) => setGenero(e.target.value as Genero)}>
+            <option value="feminino">Feminino</option>
+            <option value="masculino">Masculino</option>
+            <option value="compartilhavel">Compartilhável</option>
+          </Select>
+        </FormGroup>
         <FormGroup label="Fornecedor (opcional)">
-          <Input placeholder="Ex: Drom..." value={forn} onChange={(e) => setForn(e.target.value)} />
+          <Input placeholder="Ex: Distribuidor X..." value={forn} onChange={(e) => setForn(e.target.value)} />
         </FormGroup>
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">

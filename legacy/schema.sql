@@ -4,6 +4,8 @@
 create table if not exists essencias (
   id bigint generated always as identity primary key,
   nome text not null,
+  marca text,
+  genero text not null default 'compartilhavel' check (genero in ('feminino', 'masculino', 'compartilhavel')),
   fornecedor text,
   estoque numeric not null default 0,
   estoque_inicial numeric not null default 0,
