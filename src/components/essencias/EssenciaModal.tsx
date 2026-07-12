@@ -54,8 +54,8 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
     const nomeT = nome.trim();
     const marcaT = marca.trim();
     const fornT = forn.trim();
-    if (!nomeT || estN <= 0 || cstN <= 0) {
-      toast('Preencha todos os campos', 'err');
+    if (!nomeT || estN < 0 || cstN < 0) {
+      toast('Preencha o nome da essência', 'err');
       return;
     }
     setSaving(true);
@@ -67,7 +67,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       estoque: estN,
       estoque_inicial: editing ? editing.estoque_inicial : estN,
       custo: cstN,
-      unit: cstN / estN,
+      unit: estN > 0 ? cstN / estN : 0,
     });
     setSaving(false);
     if (ok) onClose();
@@ -111,7 +111,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <FormGroup label="Estoque (ml)">
-          <Input inputMode="decimal" placeholder="Ex: 500" value={est} onChange={(e) => setEst(e.target.value)} />
+          <Input inputMode="decimal" placeholder="Ex: 500 (ou 0 para só cadastrar)" value={est} onChange={(e) => setEst(e.target.value)} />
         </FormGroup>
         <FormGroup label="Custo global (R$)">
           <Input inputMode="decimal" placeholder="Ex: 150,00" value={cst} onChange={(e) => setCst(e.target.value)} />

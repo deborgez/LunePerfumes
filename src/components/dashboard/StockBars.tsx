@@ -7,7 +7,7 @@ interface StockItem {
   tipo?: string;
 }
 
-export default function StockBars({ list, forceTipo }: { list: StockItem[]; forceTipo?: string }) {
+export default function StockBars({ list, forceTipo, refValue }: { list: StockItem[]; forceTipo?: string; refValue?: number }) {
   if (!list.length) {
     return <p className="text-[13px] text-[var(--text-hint)]">Nenhum item cadastrado</p>;
   }
@@ -15,7 +15,7 @@ export default function StockBars({ list, forceTipo }: { list: StockItem[]; forc
     <div>
       {list.map((x, i) => {
         const t = forceTipo || x.tipo;
-        const max = x.estoque_inicial || x.estoque || 1;
+        const max = refValue || x.estoque_inicial || x.estoque || 1;
         const pct = Math.min(100, Math.round((x.estoque / max) * 100));
         const col = pct > 50 ? 'var(--green)' : pct > 20 ? 'var(--amber)' : 'var(--red)';
         return (

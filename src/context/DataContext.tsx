@@ -151,7 +151,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!item) return;
     const nEst = item.estoque + (addQ || 0);
     const nCstF = novoCusto > 0 ? novoCusto : item.custo;
-    const nUnit = nCstF / nEst;
+    const nUnit = nEst > 0 ? nCstF / nEst : 0;
     try {
       const r = await q.repor(tabela, id, { estoque: nEst, custo: nCstF, unit: nUnit });
       if (tipo === 'essencia') {

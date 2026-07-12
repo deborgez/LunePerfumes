@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { IconFlask, IconPlus, IconEdit, IconTrash, IconRefresh } from '@tabler/icons-react';
+import { IconFlask, IconPlus, IconEdit, IconTrash, IconRefresh, IconAlertTriangle } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
 import { Btn, Card, CardHeader, Badge } from '@/components/shared/ui';
 import EssenciaModal from '@/components/essencias/EssenciaModal';
 import ReporModal from '@/components/shared/ReporModal';
 import { fmt, fq } from '@/lib/format';
+import { essenciaEstoqueSeverity, sortByEstoqueAsc } from '@/lib/business';
 import type { Essencia, Genero } from '@/lib/types';
 
 const GENERO_LABEL: Record<Genero, string> = {
@@ -20,8 +21,20 @@ const GENERO_COLOR: Record<Genero, 'red' | 'purple' | 'gray'> = {
   compartilhavel: 'gray',
 };
 
+function EstoqueBadge({ estoque }: { estoque: number }) {
+  const sev = essenciaEstoqueSeverity(estoque);
+  if (!sev) return null;
+  return (
+    <Badge color={sev === 'critico' ? 'red' : 'amber'}>
+      <IconAlertTriangle size={11} className="mr-1" />
+      {sev === 'critico' ? 'Crítico' : 'Baixo'}
+    </Badge>
+  );
+}
+
 export default function EssenciasPage() {
   const { essencias, deleteEssencia } = useData();
+  const essenciasOrdenadas = sortByEstoqueAsc(essencias);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Essencia | null>(null);
   const [reporOpen, setReporOpen] = useState(false);
@@ -73,7 +86,7 @@ export default function EssenciasPage() {
               </tr>
             </thead>
             <tbody>
-              {!essencias.length ? (
+              {!essenciasOrdenadas.length ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-[13px] text-[var(--text-hint)]">
                     <IconFlask size={24} className="mx-auto mb-1.5" />
@@ -81,7 +94,7 @@ export default function EssenciasPage() {
                   </td>
                 </tr>
               ) : (
-                essencias.map((e) => (
+                essenciasOrdenadas.map((e) => (
                   <tr key={e.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
                     <td className="px-3 py-2.5 text-[var(--text)]">
                       <strong>{e.nome}</strong>
@@ -91,7 +104,12 @@ export default function EssenciasPage() {
                       <Badge color={GENERO_COLOR[e.genero]}>{GENERO_LABEL[e.genero]}</Badge>
                     </td>
                     <td className="px-3 py-2.5 text-[var(--text)]">{e.fornecedor || '—'}</td>
-                    <td className="px-3 py-2.5 text-[var(--text)]">{fq(e.estoque, 'ml')}</td>
+                    <td className="px-3 py-2.5 text-[var(--text)]">
+                      <div className="flex items-center gap-1.5">
+                        {fq(e.estoque, 'ml')}
+                        <EstoqueBadge estoque={e.estoque} />
+                      </div>
+                    </td>
                     <td className="px-3 py-2.5 text-[var(--text)]">{fmt(e.custo)}</td>
                     <td className="px-3 py-2.5 text-[var(--text)]">
                       <strong>{fmt(e.unit)}</strong>/ml
@@ -118,10 +136,10 @@ export default function EssenciasPage() {
 
         {/* Mobile list */}
         <div className="md:hidden">
-          {!essencias.length ? (
+          {!essenciasOrdenadas.length ? (
             <p className="py-5 text-center text-[13px] text-[var(--text-hint)]">Nenhuma essência cadastrada</p>
           ) : (
-            essencias.map((e) => (
+            essenciasOrdenadas.map((e) => (
               <div key={e.id} className="mb-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-[var(--shadow)]">
                 <div className="flex items-center justify-between gap-2">
                   <div>
@@ -138,7 +156,10 @@ export default function EssenciasPage() {
                 <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                   <div>
                     <div className="text-[11px] text-[var(--text-hint)]">Estoque</div>
-                    <div className="mt-[1px] text-[13px] font-medium text-[var(--text)]">{fq(e.estoque, 'ml')}</div>
+                    <div className="mt-[1px] flex items-center gap-1.5 text-[13px] font-medium text-[var(--text)]">
+                      {fq(e.estoque, 'ml')}
+                      <EstoqueBadge estoque={e.estoque} />
+                    </div>
                   </div>
                   <div>
                     <div className="text-[11px] text-[var(--text-hint)]">Custo global</div>

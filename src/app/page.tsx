@@ -7,9 +7,11 @@ import RevenueChart from '@/components/dashboard/RevenueChart';
 import PrazoList from '@/components/dashboard/PrazoList';
 import StockBars from '@/components/dashboard/StockBars';
 import { fmt } from '@/lib/format';
+import { ESSENCIA_ESTOQUE_REF, sortByEstoqueAsc } from '@/lib/business';
 
 export default function DashboardPage() {
   const { vendas, essencias, insumos, perfumes } = useData();
+  const essenciasOrdenadas = sortByEstoqueAsc(essencias);
 
   let cx = 0,
     lu = 0,
@@ -60,7 +62,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Card>
           <CardHeader title="Estoque essências" icon={<IconFlask size={17} />} />
-          <StockBars list={essencias} forceTipo="ml" />
+          <StockBars list={essenciasOrdenadas} forceTipo="ml" refValue={ESSENCIA_ESTOQUE_REF} />
         </Card>
         <Card>
           <CardHeader title="Estoque insumos" icon={<IconPackage size={17} />} />
