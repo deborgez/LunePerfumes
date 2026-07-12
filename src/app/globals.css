@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* Desktop breakpoint matches the original 680px mobile cutoff */
+@theme {
+  --breakpoint-md: 681px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ── TOKENS ── */
+:root,
+[data-theme='light'] {
+  --brand: #7f77dd;
+  --brand-light: #eeedfe;
+  --brand-dark: #3c3489;
+  --green: #1d9e75;
+  --green-light: #e1f5ee;
+  --green-dark: #085041;
+  --red: #d85a30;
+  --red-light: #faece7;
+  --red-dark: #4a1b0c;
+  --amber: #ba7517;
+  --amber-light: #faeeda;
+  --amber-dark: #412402;
+  --surface: #fff;
+  --surface2: #faf9fc;
+  --bg: #f2f0f8;
+  --border: #e2e0ea;
+  --text: #1a1a2e;
+  --text-muted: #6b6980;
+  --text-hint: #a09fb0;
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --hint-bg: #f0effe;
+  --hint-border: #d0ccf5;
+  --hint-text: #3c3489;
+  --resumo-bg: #f8f7ff;
+  --resumo-border: #dbd8f5;
+  --tbl-head: #faf9fc;
+  --tbl-hover: #faf9fc;
+  --tbl-border: #f0eef6;
+  --nav-bg: #fff;
+  --nav-border: #e2e0ea;
+}
+
+[data-theme='dark'] {
+  --brand: #9b94f0;
+  --brand-light: #26215c;
+  --brand-dark: #cecbf6;
+  --green: #5dcaa5;
+  --green-light: #04342c;
+  --green-dark: #9fe1cb;
+  --red: #f0997b;
+  --red-light: #4a1b0c;
+  --red-dark: #f5c4b3;
+  --amber: #ef9f27;
+  --amber-light: #412402;
+  --amber-dark: #fac775;
+  --surface: #1e1c2e;
+  --surface2: #252338;
+  --bg: #16141f;
+  --border: #312e4a;
+  --text: #eeedf8;
+  --text-muted: #9896b8;
+  --text-hint: #66637f;
+  --shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --hint-bg: #26215c;
+  --hint-border: #534ab7;
+  --hint-text: #cecbf6;
+  --resumo-bg: #26215c;
+  --resumo-border: #534ab7;
+  --tbl-head: #252338;
+  --tbl-hover: #252338;
+  --tbl-border: #2a2740;
+  --nav-bg: #1e1c2e;
+  --nav-border: #312e4a;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+.animate-spin-slow {
+  animation: spin 0.7s linear infinite;
+}
+.animate-slide-up {
+  animation: slideUp 0.22s;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d0ccf5;
+  border-radius: 10px;
+}
+

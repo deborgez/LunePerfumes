@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lune Perfumes</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',sans-serif;min-height:100vh;min-height:100dvh}
+
+/* ── TOKENS ── */
+[data-theme="light"]{
+  --brand:#7F77DD;--brand-light:#EEEDFE;--brand-dark:#3C3489;
+  --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#085041;
+  --red:#D85A30;--red-light:#FAECE7;--red-dark:#4A1B0C;
+  --amber:#BA7517;--amber-light:#FAEEDA;--amber-dark:#412402;
+  --surface:#fff;--surface2:#faf9fc;--bg:#F2F0F8;--border:#e2e0ea;
+  --text:#1a1a2e;--text-muted:#6b6980;--text-hint:#a09fb0;
+  --shadow:0 1px 4px rgba(0,0,0,.07);--shadow-md:0 4px 16px rgba(0,0,0,.10);
+  --hint-bg:#f0effe;--hint-border:#d0ccf5;--hint-text:#3C3489;
+  --resumo-bg:#f8f7ff;--resumo-border:#dbd8f5;
+  --tbl-head:#faf9fc;--tbl-hover:#faf9fc;--tbl-border:#f0eef6;
+  --nav-bg:#fff;--nav-border:#e2e0ea;
+}
+[data-theme="dark"]{
+  --brand:#9b94f0;--brand-light:#26215C;--brand-dark:#CECBF6;
+  --green:#5DCAA5;--green-light:#04342C;--green-dark:#9FE1CB;
+  --red:#F0997B;--red-light:#4A1B0C;--red-dark:#F5C4B3;
+  --amber:#EF9F27;--amber-light:#412402;--amber-dark:#FAC775;
+  --surface:#1e1c2e;--surface2:#252338;--bg:#16141f;--border:#312e4a;
+  --text:#eeedf8;--text-muted:#9896b8;--text-hint:#66637f;
+  --shadow:0 1px 6px rgba(0,0,0,.3);--shadow-md:0 4px 20px rgba(0,0,0,.4);
+  --hint-bg:#26215C;--hint-border:#534AB7;--hint-text:#CECBF6;
+  --resumo-bg:#26215C;--resumo-border:#534AB7;
+  --tbl-head:#252338;--tbl-hover:#252338;--tbl-border:#2a2740;
+  --nav-bg:#1e1c2e;--nav-border:#312e4a;
+}
+
+/* ══════════════════════════════════════
+   DESKTOP LAYOUT
+══════════════════════════════════════ */
+.app{display:flex;height:100vh;height:100dvh;overflow:hidden;background:var(--bg)}
+
+/* Sidebar */
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:background .2s}
+.sb-logo{padding:20px 18px 14px;border-bottom:1px solid var(--border)}
+.logo-name{font-size:18px;font-weight:600;color:var(--text)}
+.logo-name em{color:var(--brand);font-style:normal}
+.logo-sub{font-size:11px;color:var(--text-hint);margin-top:2px}
+.nav-sec{padding:14px 12px 4px;font-size:10px;font-weight:600;color:var(--text-hint);letter-spacing:.08em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:8px;margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text-muted);transition:background .15s,color .15s;user-select:none}
+.nav-item i{font-size:18px;flex-shrink:0}
+.nav-item:hover,.nav-item.active{background:var(--brand-light);color:var(--brand-dark)}
+.nav-item.active{font-weight:500}
+.sb-bottom{margin-top:auto;padding:12px 8px;border-top:1px solid var(--border)}
+.theme-btn{display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text-muted);width:100%;background:none;border:none;font-family:inherit;transition:background .15s}
+.theme-btn:hover{background:var(--brand-light);color:var(--brand-dark)}
+.sb-ver{padding:6px 18px 14px;font-size:11px;color:var(--text-hint)}
+.sync{display:flex;align-items:center;gap:6px;padding:4px 18px;font-size:11px;color:var(--text-hint)}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#ccc}
+.sdot.ok{background:var(--green)}.sdot.err{background:var(--red)}
+.sdot.spin{background:var(--amber);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600;color:var(--text)}
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* Bottom nav — hidden on desktop */
+.bottom-nav{display:none}
+
+.page{display:none}.page.active{display:block}
+
+/* ══════════════════════════════════════
+   COMPONENTS
+══════════════════════════════════════ */
+.sg{display:grid;gap:12px;margin-bottom:14px}
+.sg4{grid-template-columns:repeat(4,1fr)}.sg3{grid-template-columns:repeat(3,1fr)}.sg2{grid-template-columns:repeat(2,1fr)}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat-lbl{font-size:11px;color:var(--text-hint);font-weight:500;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
+.stat-val{font-size:20px;font-weight:600;color:var(--text)}
+.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}.stat-val.purple{color:var(--brand)}.stat-val.amber{color:var(--amber)}
+.stat-sub{font-size:11px;color:var(--text-hint);margin-top:4px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.card-title i{color:var(--brand);font-size:17px}
+
+.fg{display:grid;gap:10px;margin-bottom:10px}.fg2{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr 1fr 1fr}
+.fgroup{display:flex;flex-direction:column;gap:5px}
+.fgroup label{font-size:12px;font-weight:500;color:var(--text-muted)}
+.fgroup input,.fgroup select{padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
+.fgroup select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6980' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.fgroup input:focus,.fgroup select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(127,119,221,.15)}
+.hint{background:var(--hint-bg);border:1px solid var(--hint-border);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--hint-text);margin-top:2px;display:none}
+.hint.show{display:block}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:background .15s,transform .1s;user-select:none;white-space:nowrap}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}.btn.primary:hover{background:var(--brand-dark)}
+.btn.success{background:var(--green);color:#fff;border-color:var(--green)}.btn.success:hover{background:var(--green-dark)}
+.btn.danger{background:var(--red-light);color:var(--red-dark);border-color:transparent;padding:6px 10px;font-size:12px}
+.btn.sm{padding:7px 13px;font-size:12px}.btn.xs{padding:5px 10px;font-size:11px}
+.btn-full{width:100%}
+
+/* Tables — desktop */
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--tbl-head);font-size:11px;font-weight:600;color:var(--text-hint);text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--tbl-border);color:var(--text)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--tbl-hover)}
+.tbl-empty{text-align:center;padding:32px!important;color:var(--text-hint);font-size:13px}
+
+/* Mobile list cards (substitui tabelas no mobile) */
+.list-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.list-card-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.list-card-title{font-size:14px;font-weight:600;color:var(--text)}
+.list-card-sub{font-size:12px;color:var(--text-muted);margin-top:3px}
+.list-card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.list-card-actions .btn{flex:1;font-size:12px;padding:8px 10px}
+.list-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.lc-meta-item .lm-lbl{font-size:11px;color:var(--text-hint)}.lc-meta-item .lm-val{font-size:13px;font-weight:500;color:var(--text);margin-top:1px}
+
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
+.badge.green{background:var(--green-light);color:var(--green-dark)}.badge.red{background:var(--red-light);color:var(--red-dark)}
+.badge.amber{background:var(--amber-light);color:var(--amber-dark)}.badge.purple{background:var(--brand-light);color:var(--brand-dark)}
+.badge.gray{background:var(--surface2);color:var(--text-muted)}
+
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(10,8,30,.55);z-index:900;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:18px 18px 0 0;border:1px solid var(--border);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 -4px 40px rgba(0,0,0,.2);animation:slideUp .22s}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:12px auto 0}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;border-bottom:1px solid var(--border)}
+.modal-head h3{font-size:15px;font-weight:600;color:var(--text)}
+.modal-body{padding:16px 20px}
+.modal-foot{padding:12px 20px 20px;display:flex;gap:8px}
+.modal-foot .btn{flex:1;padding:12px}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--text-hint);font-size:20px;padding:2px 4px;border-radius:6px;display:flex}
+.close-btn:hover{background:var(--surface2)}
+
+/* Recipe rows */
+.rec-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.rec-row select,.rec-row input{padding:7px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;background:var(--surface);color:var(--text);outline:none}
+.rec-row select{flex:1}.rec-row input{width:80px}
+.rec-row .ulbl{font-size:11px;color:var(--text-hint);min-width:24px;text-align:center}
+
+/* Stock bars */
+.stock-item{margin-bottom:14px}
+.stock-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.stock-name{font-weight:500;color:var(--text)}.stock-qty{color:var(--text-muted);font-size:12px}
+.stock-track{background:var(--surface2);border-radius:20px;height:8px;overflow:hidden;border:1px solid var(--border)}
+.stock-fill{height:100%;border-radius:20px;transition:width .4s}
+
+/* Prazo */
+.prazo-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.prazo-item:last-child{border-bottom:none}
+.pi{flex:1}.pi .pcli{font-size:13px;font-weight:500;color:var(--text)}.pi .pdet{font-size:11px;color:var(--text-hint);margin-top:2px}
+
+/* Chart */
+.chart-wrap{display:flex;align-items:flex-end;gap:6px;height:90px;padding-top:10px}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:3px}
+.chart-lbl{font-size:10px;color:var(--text-hint);text-align:center;line-height:1.4}
+.chart-val{font-size:9px;font-weight:600;color:var(--brand)}
+
+/* Resumo venda */
+.resumo-box{background:var(--resumo-bg);border:1px solid var(--resumo-border);border-radius:10px;padding:14px;font-size:13px;margin:10px 0}
+.resumo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+.resumo-item .rl{font-size:11px;color:var(--text-hint);margin-bottom:3px}.resumo-item .rv{font-size:16px;font-weight:600}
+
+.divider{height:1px;background:var(--border);margin:14px 0}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:11px 20px;border-radius:10px;font-size:13px;z-index:9999;display:none;box-shadow:0 4px 20px rgba(0,0,0,.25);animation:slideUp .2s;color:#fff;white-space:nowrap;max-width:90vw}
+
+/* Loading */
+.load-cover{position:fixed;inset:0;background:rgba(10,8,30,.75);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;font-size:14px}
+.spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#d0ccf5;border-radius:10px}
+
+/* ══════════════════════════════════════
+   MOBILE (≤ 680px)
+══════════════════════════════════════ */
+@media(max-width:680px){
+  /* Hide sidebar, show bottom nav */
+  .sidebar{display:none}
+  .main{padding-bottom:64px}
+  .topbar{padding:0 16px;height:50px}
+
+  /* Bottom navigation */
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);border-top:1px solid var(--nav-border);z-index:800;padding-bottom:env(safe-area-inset-bottom)}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 4px 6px;cursor:pointer;color:var(--text-hint);font-size:10px;font-weight:500;transition:color .15s;border:none;background:none;font-family:inherit}
+  .bn-item i{font-size:22px;line-height:1}
+  .bn-item.active{color:var(--brand)}
+  .bn-item.active i{font-weight:600}
+
+  /* Content padding */
+  .content{padding:14px 14px 20px}
+
+  /* Stats — 2 cols */
+  .sg4,.sg3{grid-template-columns:repeat(2,1fr)}
+  .stat-card{padding:12px 14px}
+  .stat-val{font-size:18px}
+
+  /* Hide desktop tables, show list-cards */
+  .desktop-only{display:none}
+  .mobile-list{display:block}
+
+  /* Forms */
+  .fg2,.fg3{grid-template-columns:1fr}
+  .modal{border-radius:18px 18px 0 0;max-height:96vh}
+
+  /* Dashboard grids */
+  .dash-2col{grid-template-columns:1fr!important}
+
+  /* Toast above bottom nav */
+  .toast{bottom:76px}
+
+  /* Larger touch targets */
+  .fgroup input,.fgroup select{padding:12px 14px;font-size:16px}
+  .btn{padding:11px 16px;font-size:14px}
+  .btn.xs{padding:8px 12px;font-size:12px}
+  .btn.sm{padding:9px 14px;font-size:13px}
+  .modal-foot .btn{padding:14px}
+
+  /* Recipe rows */
+  .rec-row{flex-wrap:wrap;gap:6px}
+  .rec-row select{width:100%;flex:none}
+  .rec-row input{width:100px}
+
+  /* Resumo grid */
+  .resumo-grid{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* Tablet (681–1024px) */
+@media(min-width:681px) and (max-width:1024px){
+  .sidebar{width:180px}
+  .sg4{grid-template-columns:repeat(2,1fr)}
+  .content{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="load-cover" id="lcover"><div class="spinner"></div><div>Conectando ao banco...</div></div>
+
+<div class="app">
+<!-- ── SIDEBAR (desktop) ── -->
+<aside class="sidebar">
+  <div class="sb-logo"><div class="logo-name">Lune <em>Perfumes</em></div><div class="logo-sub">Estoque &amp; Vendas</div></div>
+  <div class="nav-sec">Menu</div>
+  <div class="nav-item active" onclick="go('dashboard',this,0)"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></div>
+  <div class="nav-item" onclick="go('essencias',this,1)"><i class="ti ti-flask"></i><span>Essências</span></div>
+  <div class="nav-item" onclick="go('insumos',this,2)"><i class="ti ti-box"></i><span>Insumos</span></div>
+  <div class="nav-item" onclick="go('perfumes',this,3)"><i class="ti ti-droplet"></i><span>Perfumes</span></div>
+  <div class="nav-item" onclick="go('vendas',this,4)"><i class="ti ti-shopping-cart"></i><span>Vendas</span></div>
+  <div class="nav-item" onclick="go('caixa',this,5)"><i class="ti ti-cash"></i><span>Caixa</span></div>
+  <div class="sb-bottom">
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="ticon"></i><span id="tlbl">Modo escuro</span></button>
+  </div>
+  <div class="sync"><div class="sdot spin" id="sdot"></div><span id="stxt">Conectando...</span></div>
+  <div class="sb-ver">v3.0 · Lune Perfumes</div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="ttitle">Dashboard</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="sync" style="padding:0" id="sync-top-mobile" ><div class="sdot spin" id="sdot2"></div></div>
+      <button class="btn sm" onclick="loadAll()"><i class="ti ti-refresh"></i><span class="desktop-only"> Atualizar</span></button>
+      <button class="btn sm" onclick="toggleTheme()" id="theme-mobile"><i class="ti ti-moon" id="ticon2"></i></button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="sg sg4" id="dash-stats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px" class="dash-2col">
+        <div class="card"><div class="card-hd"><span class="card-title"><i class="ti ti-chart-bar"></i> Receita por mês</span></div><div class="chart-wrap" id="chart-v"></div></div>
+        <div class="card"><div class="card-hd"><span class="card-title"><i class="ti ti-clock"></i> A receber</span></div><div id="dash-prazo"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="dash-2col">
+        <div class="card"><div class="card-hd"><span class="card-title"><i class="ti ti-flask"></i> Estoque essências</span></div><div id="dash-ess"></div></div>
+        <div class="card"><div class="card-hd"><span class="card-title"><i class="ti ti-package"></i> Estoque insumos</span></div><div id="dash-ins"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ESSÊNCIAS ══ -->
+    <div id="page-essencias" class="page">
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title"><i class="ti ti-flask"></i> Essências</span>
+          <button class="btn primary sm" onclick="openEss()"><i class="ti ti-plus"></i> Nova</button>
+        </div>
+        <!-- Desktop table -->
+        <div class="tbl-wrap desktop-only"><table>
+          <thead><tr><th>Nome</th><th>Fornecedor</th><th>Estoque</th><th>Custo global</th><th>Custo/ml</th><th>Ações</th></tr></thead>
+          <tbody id="tbl-ess"></tbody>
+        </table></div>
+        <!-- Mobile list -->
+        <div class="mobile-list" style="display:none" id="mlist-ess"></div>
+      </div>
+    </div>
+
+    <!-- ══ INSUMOS ══ -->
+    <div id="page-insumos" class="page">
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title"><i class="ti ti-box"></i> Insumos</span>
+          <button class="btn primary sm" onclick="openIns()"><i class="ti ti-plus"></i> Novo</button>
+        </div>
+        <div class="tbl-wrap desktop-only"><table>
+          <thead><tr><th>Nome</th><th>Tipo</th><th>Estoque</th><th>Custo global</th><th>Custo unit.</th><th>Ações</th></tr></thead>
+          <tbody id="tbl-ins"></tbody>
+        </table></div>
+        <div class="mobile-list" style="display:none" id="mlist-ins"></div>
+      </div>
+    </div>
+
+    <!-- ══ PERFUMES ══ -->
+    <div id="page-perfumes" class="page">
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title"><i class="ti ti-droplet"></i> Perfumes</span>
+          <button class="btn primary sm" onclick="openPerf()"><i class="ti ti-plus"></i> Novo</button>
+        </div>
+        <div class="tbl-wrap desktop-only"><table>
+          <thead><tr><th>Nome</th><th>Marca</th><th>Volume</th><th>Preço</th><th>Custo</th><th>Margem</th><th>Lucro</th><th>Ações</th></tr></thead>
+          <tbody id="tbl-perf"></tbody>
+        </table></div>
+        <div class="mobile-list" style="display:none" id="mlist-perf"></div>
+      </div>
+    </div>
+
+    <!-- ══ VENDAS ══ -->
+    <div id="page-vendas" class="page">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="dash-2col">
+        <div class="card">
+          <div class="card-hd"><span class="card-title"><i class="ti ti-shopping-cart"></i> Nova venda</span></div>
+          <div class="fgroup" style="margin-bottom:10px"><label>Perfume</label><select id="vperf" onchange="onVC()"></select></div>
+          <div class="fg fg2">
+            <div class="fgroup"><label>Quantidade</label><input type="number" id="vqty" value="1" min="1" inputmode="numeric" oninput="onVC()"></div>
+            <div class="fgroup"><label>Modalidade</label><select id="vtipo" onchange="onVM()"><option value="avista">À vista</option><option value="prazo">A prazo</option></select></div>
+          </div>
+          <div id="vprazo" style="display:none">
+            <div class="divider"></div>
+            <div class="fg fg2">
+              <div class="fgroup"><label>Cliente</label><input type="text" id="vcli" placeholder="Nome do cliente"></div>
+              <div class="fgroup"><label>Vencimento</label><input type="date" id="vvenc"></div>
+            </div>
+          </div>
+          <div id="vresumo" class="resumo-box" style="display:none"></div>
+          <button class="btn success btn-full" style="margin-top:12px" id="btnv" onclick="vender()"><i class="ti ti-check"></i> Confirmar venda</button>
+        </div>
+        <div class="card"><div class="card-hd"><span class="card-title"><i class="ti ti-receipt"></i> A prazo pendentes</span></div><div id="prazo-list"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ CAIXA ══ -->
+    <div id="page-caixa" class="page">
+      <div class="sg sg3" id="caixa-stats"></div>
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title"><i class="ti ti-history"></i> Histórico</span>
+          <select id="hfiltro" onchange="renderCaixa()" style="padding:7px 30px 7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;background:var(--surface);color:var(--text);outline:none;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%236b6980%22 stroke-width=%222%22%3E%3Cpath d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 8px center">
+            <option value="todos">Todos</option><option value="avista">À vista</option><option value="prazo">A prazo</option><option value="pago">Pagos</option><option value="pendente">Pendentes</option>
+          </select>
+        </div>
+        <!-- Desktop table -->
+        <div class="tbl-wrap desktop-only"><table>
+          <thead><tr><th>Data</th><th>Perfume</th><th>Qtd</th><th>Tipo</th><th>Cliente</th><th>Receita</th><th>Custo</th><th>Lucro</th><th>Status</th></tr></thead>
+          <tbody id="tbl-hist"></tbody>
+        </table></div>
+        <!-- Mobile list -->
+        <div class="mobile-list" style="display:none" id="mlist-hist"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── BOTTOM NAV (mobile) ── -->
+<nav class="bottom-nav">
+  <button class="bn-item active" onclick="go('dashboard',null,0)"><i class="ti ti-layout-dashboard"></i><span>Início</span></button>
+  <button class="bn-item" onclick="go('essencias',null,1)"><i class="ti ti-flask"></i><span>Essências</span></button>
+  <button class="bn-item" onclick="go('insumos',null,2)"><i class="ti ti-box"></i><span>Insumos</span></button>
+  <button class="bn-item" onclick="go('perfumes',null,3)"><i class="ti ti-droplet"></i><span>Perfumes</span></button>
+  <button class="bn-item" onclick="go('vendas',null,4)"><i class="ti ti-shopping-cart"></i><span>Vendas</span></button>
+  <button class="bn-item" onclick="go('caixa',null,5)"><i class="ti ti-cash"></i><span>Caixa</span></button>
+</nav>
+
+<!-- ══════════ MODAIS ══════════ -->
+<!-- Essência -->
+<div class="overlay" id="m-ess">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="mess-t">Nova essência</h3><button class="close-btn" onclick="closeModal('m-ess')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="fg fg2">
+        <div class="fgroup"><label>Nome da essência</label><input type="text" id="enom" placeholder="Ex: Oud, Vanilla..."></div>
+        <div class="fgroup"><label>Fornecedor (opcional)</label><input type="text" id="eforn" placeholder="Ex: Drom..."></div>
+      </div>
+      <div class="fg fg2">
+        <div class="fgroup"><label>Estoque (ml)</label><input type="text" id="eest" inputmode="decimal" placeholder="Ex: 500" oninput="ehint()"></div>
+        <div class="fgroup"><label>Custo global (R$)</label><input type="text" id="ecst" inputmode="decimal" placeholder="Ex: 150,00" oninput="ehint()"></div>
+      </div>
+      <div class="hint" id="ehintbox"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-ess')">Cancelar</button>
+      <button class="btn primary" onclick="saveEss()"><i class="ti ti-check"></i> Salvar essência</button>
+    </div>
+  </div>
+</div>
+
+<!-- Insumo -->
+<div class="overlay" id="m-ins">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="mins-t">Novo insumo</h3><button class="close-btn" onclick="closeModal('m-ins')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="fgroup" style="margin-bottom:10px"><label>Nome do insumo</label><input type="text" id="inom" placeholder="Ex: Frasco 50ml, Tampa..."></div>
+      <div class="fg fg2">
+        <div class="fgroup"><label>Tipo</label><select id="itipo" onchange="ihintupd()"><option value="ml">Líquido (ml)</option><option value="un">Unitário</option></select></div>
+        <div class="fgroup"><label id="iest-lbl">Estoque total (ml)</label><input type="text" id="iest" inputmode="decimal" placeholder="Ex: 1000" oninput="ihint()"></div>
+      </div>
+      <div class="fgroup" style="margin-bottom:10px"><label>Custo global (R$)</label><input type="text" id="icst" inputmode="decimal" placeholder="Ex: 120,00" oninput="ihint()"></div>
+      <div class="hint" id="ihintbox"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-ins')">Cancelar</button>
+      <button class="btn primary" onclick="saveIns()"><i class="ti ti-check"></i> Salvar insumo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Perfume -->
+<div class="overlay" id="m-perf">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3 id="mperf-t">Novo perfume</h3><button class="close-btn" onclick="closeModal('m-perf')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <div class="fg fg2">
+        <div class="fgroup"><label>Nome</label><input type="text" id="pnom" placeholder="Ex: Midnight Rose"></div>
+        <div class="fgroup"><label>Marca</label><input type="text" id="pmarca" placeholder="Ex: Lune"></div>
+      </div>
+      <div class="fg fg2">
+        <div class="fgroup"><label>Volume (ml)</label><input type="number" id="pml" inputmode="decimal" placeholder="50"></div>
+        <div class="fgroup"><label>Preço de venda (R$)</label><input type="text" id="ppreco" inputmode="decimal" placeholder="89,90" oninput="calcPC()"></div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:600;color:var(--text)">Receita de produção</span>
+        <button class="btn xs" onclick="addRR()"><i class="ti ti-plus"></i> Adicionar item</button>
+      </div>
+      <div id="rec-ed"></div>
+      <div class="hint show" style="display:block;margin-top:10px">
+        Custo: <strong id="pcval">R$ 0,00</strong>&nbsp;·&nbsp;
+        Lucro: <strong id="plval">R$ 0,00</strong>&nbsp;·&nbsp;
+        Margem: <strong id="pmval">0%</strong>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-perf')">Cancelar</button>
+      <button class="btn primary" onclick="savePerf()"><i class="ti ti-check"></i> Salvar perfume</button>
+    </div>
+  </div>
+</div>
+
+<!-- Baixa -->
+<div class="overlay" id="m-baixa">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3>Confirmar recebimento</h3><button class="close-btn" onclick="closeModal('m-baixa')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body"><p style="font-size:14px;color:var(--text-muted);line-height:1.6" id="bdesc"></p></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-baixa')">Cancelar</button>
+      <button class="btn success" onclick="doBaixa()"><i class="ti ti-cash"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Repor -->
+<div class="overlay" id="m-repor">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-handle"></div>
+    <div class="modal-head"><h3>Repor estoque</h3><button class="close-btn" onclick="closeModal('m-repor')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;line-height:1.5" id="rdesc"></p>
+      <div class="fg fg2">
+        <div class="fgroup"><label id="rqtd-lbl">Adicionar ao estoque</label><input type="text" id="rqtd" inputmode="decimal" placeholder="0"></div>
+        <div class="fgroup"><label>Novo custo global (R$)</label><input type="text" id="rcst" inputmode="decimal" placeholder="Opcional"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('m-repor')">Cancelar</button>
+      <button class="btn primary" onclick="doRepor()"><i class="ti ti-check"></i> Atualizar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SUPA='https://zgfnzbeslxsjwbkvlxwp.supabase.co';
+var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnZm56YmVzbHhzandia3ZseHdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjE4OTUsImV4cCI6MjA5ODEzNzg5NX0.EYrYhIgFHD2OheHWptXpx5ISaUFCc5qYxC5cYjR4L1k';
+var H={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=representation'};
+
+async function api(m,t,b,q){
+  var r=await fetch(SUPA+'/rest/v1/'+t+(q||''),{method:m,headers:H,body:b?JSON.stringify(b):undefined});
+  if(!r.ok)throw new Error(await r.text());
+  var s=await r.text();return s?JSON.parse(s):null;
+}
+var GET=function(t,q){return api('GET',t,null,q);};
+var POST=function(t,b){return api('POST',t,b);};
+var PATCH=function(t,b,q){return api('PATCH',t,b,q);};
+var DEL=function(t,q){return api('DELETE',t,null,q);};
+
+var ESS=[],INS=[],PERF=[],VEND=[];
+var recRows=[],eId=null,iId=null,pId=null,bId=null,rId=null,rTipo=null;
+var dark=localStorage.getItem('lune_dark')==='1';
+var isMobile=function(){return window.innerWidth<=680;};
+
+function br(s){if(typeof s==='number')return s;return parseFloat((s||'').toString().replace(/\./g,'').replace(',','.'))||0;}
+function fmt(v){return 'R$ '+parseFloat(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function fq(v,t){return parseFloat(v||0).toFixed(0)+(t==='ml'?' ml':' un');}
+function tod(){return new Date().toISOString().split('T')[0];}
+function fd(d){if(!d)return'—';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+
+function setSS(s,m){
+  ['sdot','sdot2'].forEach(function(id){document.getElementById(id).className='sdot '+s;});
+  document.getElementById('stxt').textContent=m;
+}
+function toast(m,t){
+  var el=document.getElementById('toast');
+  el.textContent=m;el.style.background=t==='err'?'#993C1D':t==='ok'?'#085041':'#1a1a2e';
+  el.style.display='block';clearTimeout(el._t);el._t=setTimeout(function(){el.style.display='none';},2800);
+}
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('.overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o){o.classList.remove('open');document.body.style.overflow='';}});});
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  ['ticon','ticon2'].forEach(function(id){document.getElementById(id).className=dark?'ti ti-sun':'ti ti-moon';});
+  document.getElementById('tlbl').textContent=dark?'Modo claro':'Modo escuro';
+}
+function toggleTheme(){dark=!dark;localStorage.setItem('lune_dark',dark?'1':'0');applyTheme();}
+applyTheme();
+
+var PAGES=['dashboard','essencias','insumos','perfumes','vendas','caixa'];
+var PTITLES={dashboard:'Dashboard',essencias:'Essências',insumos:'Insumos',perfumes:'Perfumes',vendas:'Vendas',caixa:'Caixa'};
+var RENDERS={dashboard:renderDash,essencias:renderEss,insumos:renderIns,perfumes:renderPerf,vendas:renderVend,caixa:renderCaixa};
+
+function go(page,sideEl,idx){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  document.querySelectorAll('.bn-item').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('page-'+page).classList.add('active');
+  if(sideEl)sideEl.classList.add('active');
+  document.querySelectorAll('.bn-item')[idx].classList.add('active');
+  document.getElementById('ttitle').textContent=PTITLES[page];
+  RENDERS[page]();
+}
+
+function gi(tipo,id){return tipo==='essencia'?ESS.find(function(x){return x.id===id;}):INS.find(function(x){return x.id===id;});}
+function allItems(){
+  return ESS.map(function(e){return{tipo:'essencia',id:e.id,nome:e.nome+' (ess.)',unit:e.unit,tu:'ml'};})
+    .concat(INS.map(function(i){return{tipo:'insumo',id:i.id,nome:i.nome,unit:i.unit,tu:i.tipo};}));
+}
+function custo1(p){
+  var c=0,rec=Array.isArray(p.receita)?p.receita:JSON.parse(p.receita||'[]');
+  rec.forEach(function(r){var it=gi(r.tipo,r.itemId||r.item_id);if(it)c+=it.unit*(r.qtd||0);});return c;
+}
+
+async function loadAll(){
+  setSS('spin','Sincronizando...');
+  try{
+    var r=await Promise.all([GET('essencias','?order=created_at.asc'),GET('insumos','?order=created_at.asc'),GET('perfumes','?order=created_at.asc'),GET('vendas','?order=created_at.desc')]);
+    ESS=r[0]||[];INS=r[1]||[];PERF=r[2]||[];VEND=r[3]||[];
+    setSS('ok','Sincronizado');
+    document.getElementById('lcover').style.display='none';
+    renderDash();
+  }catch(e){
+    setSS('err','Erro de conexão');
+    document.getElementById('lcover').innerHTML='<div style="font-size:40px;color:#F0997B"><i class="ti ti-wifi-off"></i></div><div style="color:#fff;font-size:15px">Erro ao conectar</div><div style="color:#aaa;font-size:12px;margin-top:6px">Verifique sua internet</div><button onclick="loadAll()" style="margin-top:18px;padding:12px 24px;background:var(--brand);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit">Tentar novamente</button>';
+  }
+}
+
+/* ── DASHBOARD ── */
+function sc(l,c,v,ic,s){return '<div class="stat-card"><div class="stat-lbl"><i class="ti '+ic+'"></i>'+l+'</div><div class="stat-val '+(c||'')+'">'+v+'</div><div class="stat-sub">'+s+'</div></div>';}
+function renderDash(){
+  var cx=0,lu=0,pend=0,tot=0;
+  VEND.forEach(function(v){tot+=v.receita_valor||0;if(v.status==='pago'){cx+=v.receita_valor||0;lu+=v.lucro_valor||0;}else pend+=v.receita_valor||0;});
+  document.getElementById('dash-stats').innerHTML=
+    sc('Caixa','green',fmt(cx),'ti-cash',VEND.filter(function(v){return v.status==='pago';}).length+' vendas pagas')+
+    sc('A receber','amber',fmt(pend),'ti-clock',VEND.filter(function(v){return v.status==='pendente';}).length+' pendentes')+
+    sc('Lucro','purple',fmt(lu),'ti-trending-up','vendas pagas')+
+    sc('Faturamento','',fmt(tot),'ti-chart-bar',VEND.length+' vendas');
+  var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var ma=new Date().getMonth(),labels=[],vals=[];
+  for(var m=ma-5;m<=ma;m++){
+    var idx=(m+12)%12;labels.push(meses[idx]);
+    var soma=0,ano=new Date().getFullYear();
+    VEND.forEach(function(v){var vm=parseInt((v.data||'').split('-')[1]||0)-1,vy=parseInt((v.data||'').split('-')[0]);if(vm===idx&&vy===ano)soma+=v.receita_valor||0;});
+    vals.push(soma);
+  }
+  var mx=Math.max.apply(null,vals)||1;
+  document.getElementById('chart-v').innerHTML=labels.map(function(m,i){
+    var h=Math.max(4,Math.round((vals[i]/mx)*80));
+    return '<div class="chart-col"><div class="chart-val">'+fmt(vals[i]).replace('R$ ','')+'</div><div class="chart-bar" style="height:'+h+'px;background:var(--brand)"></div><div class="chart-lbl">'+m+'</div></div>';
+  }).join('');
+  var pe=VEND.filter(function(v){return v.status==='pendente';});
+  document.getElementById('dash-prazo').innerHTML=!pe.length?'<p style="color:var(--text-hint);font-size:13px;padding:8px 0">Nenhuma conta pendente ✓</p>':
+    pe.map(function(v){var p=PERF.find(function(p){return p.id===v.perf_id;});return'<div class="prazo-item"><div class="pi"><div class="pcli">'+(v.cliente||'—')+'</div><div class="pdet">'+(p?p.nome:'')+'&nbsp;×'+v.qty+'&nbsp;·&nbsp;Vence '+fd(v.venc)+'</div></div><span class="badge amber">'+fmt(v.receita_valor)+'</span></div>';}).join('');
+  document.getElementById('dash-ess').innerHTML=sbars(ESS,'ml');
+  document.getElementById('dash-ins').innerHTML=sbars(INS,null);
+}
+function sbars(list,ft){
+  if(!list.length)return'<p style="color:var(--text-hint);font-size:13px">Nenhum item cadastrado</p>';
+  return list.map(function(x){
+    var t=ft||x.tipo,max=x.estoque_inicial||x.estoque||1;
+    var pct=Math.min(100,Math.round((x.estoque/max)*100));
+    var col=pct>50?'var(--green)':pct>20?'var(--amber)':'var(--red)';
+    return '<div class="stock-item"><div class="stock-head"><span class="stock-name">'+x.nome+'</span><span class="stock-qty">'+fq(x.estoque,t)+'</span></div><div class="stock-track"><div class="stock-fill" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
+  }).join('');
+}
+
+/* ── ESSÊNCIAS ── */
+function renderEss(){
+  var rows=!ESS.length?'<tr><td colspan="6" class="tbl-empty"><i class="ti ti-flask" style="font-size:24px;display:block;margin-bottom:6px"></i>Nenhuma essência</td></tr>':
+    ESS.map(function(e){return'<tr><td><strong>'+e.nome+'</strong></td><td>'+(e.fornecedor||'—')+'</td><td>'+fq(e.estoque,'ml')+'</td><td>'+fmt(e.custo)+'</td><td><strong>'+fmt(e.unit)+'</strong>/ml</td><td><div style="display:flex;gap:6px"><button class="btn xs" onclick="openRepor('+e.id+',\'essencia\')"><i class="ti ti-refresh"></i></button><button class="btn xs" onclick="editEss('+e.id+')"><i class="ti ti-edit"></i></button><button class="btn xs danger" onclick="delEss('+e.id+')"><i class="ti ti-trash"></i></button></div></td></tr>';}).join('');
+  document.getElementById('tbl-ess').innerHTML=rows;
+  var mob=!ESS.length?'<p style="color:var(--text-hint);font-size:13px;text-align:center;padding:20px 0">Nenhuma essência cadastrada</p>':
+    ESS.map(function(e){return'<div class="list-card"><div class="list-card-row"><div><div class="list-card-title">'+e.nome+'</div><div class="list-card-sub">'+(e.fornecedor||'Sem fornecedor')+'</div></div><span class="badge purple">'+fmt(e.unit)+'/ml</span></div><div class="list-card-meta"><div class="lc-meta-item"><div class="lm-lbl">Estoque</div><div class="lm-val">'+fq(e.estoque,'ml')+'</div></div><div class="lc-meta-item"><div class="lm-lbl">Custo global</div><div class="lm-val">'+fmt(e.custo)+'</div></div></div><div class="list-card-actions"><button class="btn sm" onclick="openRepor('+e.id+',\'essencia\')"><i class="ti ti-refresh"></i> Repor</button><button class="btn sm" onclick="editEss('+e.id+')"><i class="ti ti-edit"></i> Editar</button><button class="btn sm danger" onclick="delEss('+e.id+')"><i class="ti ti-trash"></i></button></div></div>';}).join('');
+  document.getElementById('mlist-ess').innerHTML=mob;
+}
+function openEss(){eId=null;document.getElementById('mess-t').textContent='Nova essência';['enom','eforn','eest','ecst'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('ehintbox').classList.remove('show');openModal('m-ess');}
+function editEss(id){eId=id;var e=ESS.find(function(x){return x.id===id;});document.getElementById('mess-t').textContent='Editar essência';document.getElementById('enom').value=e.nome;document.getElementById('eforn').value=e.fornecedor||'';document.getElementById('eest').value=e.estoque;document.getElementById('ecst').value=e.custo.toFixed(2).replace('.',',');ehint();openModal('m-ess');}
+function ehint(){var est=br(document.getElementById('eest').value),cst=br(document.getElementById('ecst').value),h=document.getElementById('ehintbox');if(est>0&&cst>0){h.classList.add('show');h.innerHTML='Custo por ml: <strong>'+fmt(cst/est)+'</strong>';}else h.classList.remove('show');}
+async function saveEss(){
+  var nome=document.getElementById('enom').value.trim(),forn=document.getElementById('eforn').value.trim();
+  var est=br(document.getElementById('eest').value),cst=br(document.getElementById('ecst').value);
+  if(!nome||est<=0||cst<=0){toast('Preencha todos os campos','err');return;}
+  var body={nome:nome,fornecedor:forn,estoque:est,estoque_inicial:est,custo:cst,unit:cst/est};
+  try{
+    if(eId){var r=await PATCH('essencias',body,'?id=eq.'+eId);ESS[ESS.findIndex(function(x){return x.id===eId;})]=r[0];toast('Essência atualizada!','ok');}
+    else{var r=await POST('essencias',body);ESS.push(r[0]);toast('Essência cadastrada!','ok');}
+    closeModal('m-ess');eId=null;renderEss();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+async function delEss(id){if(!confirm('Excluir esta essência?'))return;try{await DEL('essencias','?id=eq.'+id);ESS=ESS.filter(function(x){return x.id!==id;});renderEss();toast('Removida');}catch(e){toast('Erro','err');}}
+
+/* ── INSUMOS ── */
+function renderIns(){
+  var rows=!INS.length?'<tr><td colspan="6" class="tbl-empty"><i class="ti ti-box" style="font-size:24px;display:block;margin-bottom:6px"></i>Nenhum insumo</td></tr>':
+    INS.map(function(i){return'<tr><td><strong>'+i.nome+'</strong></td><td><span class="badge '+(i.tipo==='ml'?'purple':'gray')+'">'+i.tipo+'</span></td><td>'+fq(i.estoque,i.tipo)+'</td><td>'+fmt(i.custo)+'</td><td><strong>'+fmt(i.unit)+'</strong>/'+i.tipo+'</td><td><div style="display:flex;gap:6px"><button class="btn xs" onclick="openRepor('+i.id+',\'insumo\')"><i class="ti ti-refresh"></i></button><button class="btn xs" onclick="editIns('+i.id+')"><i class="ti ti-edit"></i></button><button class="btn xs danger" onclick="delIns('+i.id+')"><i class="ti ti-trash"></i></button></div></td></tr>';}).join('');
+  document.getElementById('tbl-ins').innerHTML=rows;
+  var mob=!INS.length?'<p style="color:var(--text-hint);font-size:13px;text-align:center;padding:20px 0">Nenhum insumo cadastrado</p>':
+    INS.map(function(i){return'<div class="list-card"><div class="list-card-row"><div><div class="list-card-title">'+i.nome+'</div><div class="list-card-sub"><span class="badge '+(i.tipo==='ml'?'purple':'gray')+'" style="font-size:10px">'+i.tipo+'</span></div></div><span class="badge gray">'+fmt(i.unit)+'/'+i.tipo+'</span></div><div class="list-card-meta"><div class="lc-meta-item"><div class="lm-lbl">Estoque</div><div class="lm-val">'+fq(i.estoque,i.tipo)+'</div></div><div class="lc-meta-item"><div class="lm-lbl">Custo global</div><div class="lm-val">'+fmt(i.custo)+'</div></div></div><div class="list-card-actions"><button class="btn sm" onclick="openRepor('+i.id+',\'insumo\')"><i class="ti ti-refresh"></i> Repor</button><button class="btn sm" onclick="editIns('+i.id+')"><i class="ti ti-edit"></i> Editar</button><button class="btn sm danger" onclick="delIns('+i.id+')"><i class="ti ti-trash"></i></button></div></div>';}).join('');
+  document.getElementById('mlist-ins').innerHTML=mob;
+}
+function openIns(){iId=null;document.getElementById('mins-t').textContent='Novo insumo';['inom','iest','icst'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('itipo').value='ml';ihintupd();document.getElementById('ihintbox').classList.remove('show');openModal('m-ins');}
+function editIns(id){iId=id;var i=INS.find(function(x){return x.id===id;});document.getElementById('mins-t').textContent='Editar insumo';document.getElementById('inom').value=i.nome;document.getElementById('itipo').value=i.tipo;document.getElementById('iest').value=i.estoque;document.getElementById('icst').value=i.custo.toFixed(2).replace('.',',');ihintupd();ihint();openModal('m-ins');}
+function ihintupd(){var t=document.getElementById('itipo').value;document.getElementById('iest-lbl').textContent=t==='ml'?'Estoque total (ml)':'Quantidade em estoque';}
+function ihint(){var est=br(document.getElementById('iest').value),cst=br(document.getElementById('icst').value),t=document.getElementById('itipo').value,h=document.getElementById('ihintbox');if(est>0&&cst>0){h.classList.add('show');h.innerHTML='Custo por '+(t==='ml'?'ml':'unidade')+': <strong>'+fmt(cst/est)+'</strong>';}else h.classList.remove('show');}
+async function saveIns(){
+  var nome=document.getElementById('inom').value.trim(),tipo=document.getElementById('itipo').value;
+  var est=br(document.getElementById('iest').value),cst=br(document.getElementById('icst').value);
+  if(!nome||est<=0||cst<=0){toast('Preencha todos os campos','err');return;}
+  var body={nome:nome,tipo:tipo,estoque:est,estoque_inicial:est,custo:cst,unit:cst/est};
+  try{
+    if(iId){var r=await PATCH('insumos',body,'?id=eq.'+iId);INS[INS.findIndex(function(x){return x.id===iId;})]=r[0];toast('Insumo atualizado!','ok');}
+    else{var r=await POST('insumos',body);INS.push(r[0]);toast('Insumo cadastrado!','ok');}
+    closeModal('m-ins');iId=null;renderIns();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+async function delIns(id){if(!confirm('Excluir este insumo?'))return;try{await DEL('insumos','?id=eq.'+id);INS=INS.filter(function(x){return x.id!==id;});renderIns();toast('Removido');}catch(e){toast('Erro','err');}}
+
+/* ── REPOR ── */
+function openRepor(id,tipo){
+  rId=id;rTipo=tipo;
+  var item=tipo==='essencia'?ESS.find(function(x){return x.id===id;}):INS.find(function(x){return x.id===id;});
+  var unid=tipo==='essencia'?'ml':(item.tipo||'un');
+  document.getElementById('rdesc').textContent=item.nome+' — estoque atual: '+fq(item.estoque,unid);
+  document.getElementById('rqtd-lbl').textContent='Adicionar ao estoque ('+unid+')';
+  document.getElementById('rqtd').value='';document.getElementById('rcst').value='';openModal('m-repor');
+}
+async function doRepor(){
+  var lista=rTipo==='essencia'?ESS:INS,item=lista.find(function(x){return x.id===rId;});
+  var addQ=br(document.getElementById('rqtd').value)||0,nCst=br(document.getElementById('rcst').value);
+  var nEst=item.estoque+addQ,nCstF=nCst>0?nCst:item.custo,nUnit=nCstF/nEst;
+  try{
+    var r=await PATCH(rTipo==='essencia'?'essencias':'insumos',{estoque:nEst,custo:nCstF,unit:nUnit},'?id=eq.'+rId);
+    lista[lista.findIndex(function(x){return x.id===rId;})]=r[0];
+    closeModal('m-repor');toast('Estoque atualizado!','ok');
+    if(rTipo==='essencia')renderEss();else renderIns();
+  }catch(e){toast('Erro','err');}
+}
+
+/* ── PERFUMES ── */
+function renderPerf(){
+  var rows=!PERF.length?'<tr><td colspan="8" class="tbl-empty"><i class="ti ti-droplet" style="font-size:24px;display:block;margin-bottom:6px"></i>Nenhum perfume</td></tr>':
+    PERF.map(function(p){var c=custo1(p),l=p.preco-c,mg=p.preco>0?Math.round((l/p.preco)*100):0;return'<tr><td><strong>'+p.nome+'</strong></td><td>'+p.marca+'</td><td>'+p.ml+' ml</td><td>'+fmt(p.preco)+'</td><td style="color:var(--red)">'+fmt(c)+'</td><td><span class="badge '+(mg>=30?'green':mg>=10?'amber':'red')+'">'+mg+'%</span></td><td style="color:'+(l>=0?'var(--green)':'var(--red)')+';font-weight:600">'+fmt(l)+'</td><td><div style="display:flex;gap:6px"><button class="btn xs" onclick="editPerf('+p.id+')"><i class="ti ti-edit"></i></button><button class="btn xs danger" onclick="delPerf('+p.id+')"><i class="ti ti-trash"></i></button></div></td></tr>';}).join('');
+  document.getElementById('tbl-perf').innerHTML=rows;
+  var mob=!PERF.length?'<p style="color:var(--text-hint);font-size:13px;text-align:center;padding:20px 0">Nenhum perfume cadastrado</p>':
+    PERF.map(function(p){var c=custo1(p),l=p.preco-c,mg=p.preco>0?Math.round((l/p.preco)*100):0;return'<div class="list-card"><div class="list-card-row"><div><div class="list-card-title">'+p.nome+'</div><div class="list-card-sub">'+p.marca+' · '+p.ml+' ml</div></div><span class="badge '+(mg>=30?'green':mg>=10?'amber':'red')+'">'+mg+'% margem</span></div><div class="list-card-meta"><div class="lc-meta-item"><div class="lm-lbl">Preço venda</div><div class="lm-val">'+fmt(p.preco)+'</div></div><div class="lc-meta-item"><div class="lm-lbl">Custo produção</div><div class="lm-val" style="color:var(--red)">'+fmt(c)+'</div></div><div class="lc-meta-item"><div class="lm-lbl">Lucro unit.</div><div class="lm-val" style="color:'+(l>=0?'var(--green)':'var(--red)')+'">'+fmt(l)+'</div></div></div><div class="list-card-actions"><button class="btn sm" onclick="editPerf('+p.id+')"><i class="ti ti-edit"></i> Editar</button><button class="btn sm danger" onclick="delPerf('+p.id+')"><i class="ti ti-trash"></i></button></div></div>';}).join('');
+  document.getElementById('mlist-perf').innerHTML=mob;
+}
+function openPerf(){pId=null;recRows=[];document.getElementById('mperf-t').textContent='Novo perfume';['pnom','pmarca','ppreco'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('pml').value='';renderRE();calcPC();openModal('m-perf');}
+function editPerf(id){
+  var p=PERF.find(function(p){return p.id===id;});pId=id;
+  var rec=Array.isArray(p.receita)?p.receita:JSON.parse(p.receita||'[]');
+  recRows=rec.map(function(r){return{tipo:r.tipo,itemId:r.itemId||r.item_id,qtd:r.qtd};});
+  document.getElementById('mperf-t').textContent='Editar perfume';
+  document.getElementById('pnom').value=p.nome;document.getElementById('pmarca').value=p.marca;
+  document.getElementById('pml').value=p.ml;document.getElementById('ppreco').value=p.preco.toFixed(2).replace('.',',');
+  renderRE();calcPC();openModal('m-perf');
+}
+function renderRE(){
+  var all=allItems();
+  document.getElementById('rec-ed').innerHTML=recRows.map(function(r,i){
+    var opts=all.map(function(x){return'<option value="'+x.tipo+'|'+x.id+'"'+((x.tipo===r.tipo&&x.id===r.itemId)?' selected':'')+'>'+x.nome+'</option>';}).join('');
+    var cur=all.find(function(x){return x.tipo===r.tipo&&x.id===r.itemId;})||{tu:'un'};
+    return'<div class="rec-row"><select onchange="onRS('+i+',this.value)">'+opts+'</select><input type="number" value="'+r.qtd+'" min="0" step="0.1" inputmode="decimal" oninput="recRows['+i+'].qtd=parseFloat(this.value)||0;calcPC()"><span class="ulbl">'+cur.tu+'</span><button class="btn xs danger" onclick="recRows.splice('+i+',1);renderRE();calcPC()"><i class="ti ti-trash"></i></button></div>';
+  }).join('');
+}
+function onRS(i,v){var p=v.split('|');recRows[i].tipo=p[0];recRows[i].itemId=parseInt(p[1]);renderRE();calcPC();}
+function addRR(){var all=allItems();if(!all.length){toast('Cadastre essências ou insumos primeiro','err');return;}recRows.push({tipo:all[0].tipo,itemId:all[0].id,qtd:0});renderRE();calcPC();}
+function calcPC(){
+  var c=0;recRows.forEach(function(r){var it=gi(r.tipo,r.itemId);if(it)c+=it.unit*r.qtd;});
+  var pr=br(document.getElementById('ppreco').value),l=isNaN(pr)?-c:pr-c,mg=(isNaN(pr)||pr<=0)?0:Math.round((l/pr)*100);
+  document.getElementById('pcval').textContent=fmt(c);
+  document.getElementById('plval').textContent=fmt(l);document.getElementById('plval').style.color=l>=0?'var(--green)':'var(--red)';
+  document.getElementById('pmval').textContent=mg+'%';
+}
+async function savePerf(){
+  var nome=document.getElementById('pnom').value.trim(),marca=document.getElementById('pmarca').value.trim();
+  var ml=parseFloat(document.getElementById('pml').value),preco=br(document.getElementById('ppreco').value);
+  if(!nome||!marca||isNaN(ml)||isNaN(preco)){toast('Preencha todos os campos','err');return;}
+  var body={nome:nome,marca:marca,ml:ml,preco:preco,receita:recRows.map(function(r){return{tipo:r.tipo,itemId:r.itemId,qtd:r.qtd};})};
+  try{
+    if(pId){var r=await PATCH('perfumes',body,'?id=eq.'+pId);PERF[PERF.findIndex(function(x){return x.id===pId;})]=r[0];toast('Perfume atualizado!','ok');}
+    else{var r=await POST('perfumes',body);PERF.push(r[0]);toast('Perfume cadastrado!','ok');}
+    closeModal('m-perf');renderPerf();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+async function delPerf(id){if(!confirm('Excluir este perfume?'))return;try{await DEL('perfumes','?id=eq.'+id);PERF=PERF.filter(function(x){return x.id!==id;});renderPerf();toast('Removido');}catch(e){toast('Erro','err');}}
+
+/* ── VENDAS ── */
+function renderVend(){
+  var sel=document.getElementById('vperf');
+  sel.innerHTML=PERF.length?PERF.map(function(p){return'<option value="'+p.id+'">'+p.nome+' — '+fmt(p.preco)+'</option>';}).join(''):'<option value="">— Cadastre perfumes primeiro —</option>';
+  onVC();renderPL();
+}
+function onVM(){document.getElementById('vprazo').style.display=document.getElementById('vtipo').value==='prazo'?'block':'none';onVC();}
+function onVC(){
+  var pid=parseInt(document.getElementById('vperf').value),qty=parseInt(document.getElementById('vqty').value)||1;
+  var p=PERF.find(function(p){return p.id===pid;}),box=document.getElementById('vresumo');
+  if(!p){box.style.display='none';return;}
+  var c=custo1(p)*qty,rec=p.preco*qty,l=rec-c;
+  var r2=Array.isArray(p.receita)?p.receita:JSON.parse(p.receita||'[]');
+  var itens=r2.map(function(r){var it=gi(r.tipo,r.itemId||r.item_id);if(!it)return'';return'<span style="display:inline-block;margin:2px 4px 2px 0;padding:3px 10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">'+it.nome.split(' (')[0]+': '+(r.qtd*qty)+(r.tipo==='essencia'||it.tipo==='ml'?' ml':' un')+'</span>';}).join('');
+  box.style.display='block';
+  box.innerHTML='<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Insumos consumidos:</div><div style="margin-bottom:10px">'+itens+'</div><div class="resumo-grid"><div class="resumo-item"><div class="rl">Receita</div><div class="rv" style="color:var(--green)">'+fmt(rec)+'</div></div><div class="resumo-item"><div class="rl">Custo</div><div class="rv" style="color:var(--red)">'+fmt(c)+'</div></div><div class="resumo-item"><div class="rl">Lucro</div><div class="rv" style="color:'+(l>=0?'var(--brand)':'var(--red)')+'">'+fmt(l)+'</div></div></div>';
+}
+async function vender(){
+  var pid=parseInt(document.getElementById('vperf').value),qty=parseInt(document.getElementById('vqty').value)||1;
+  var tipo=document.getElementById('vtipo').value,cli=document.getElementById('vcli').value.trim(),venc=document.getElementById('vvenc').value;
+  if(!pid||isNaN(pid)){toast('Selecione um perfume','err');return;}
+  if(tipo==='prazo'&&!cli){toast('Informe o cliente','err');return;}
+  if(tipo==='prazo'&&!venc){toast('Informe o vencimento','err');return;}
+  var p=PERF.find(function(p){return p.id===pid;});
+  var c=custo1(p)*qty,rv=p.preco*qty,lv=rv-c;
+  var btn=document.getElementById('btnv');btn.disabled=true;
+  try{
+    var vr=await POST('vendas',{perf_id:pid,qty:qty,tipo:tipo,cliente:cli||'',data:tod(),status:tipo==='avista'?'pago':'pendente',venc:venc||null,receita_valor:rv,custo_valor:c,lucro_valor:lv});
+    VEND.unshift(vr[0]);
+    var rec=Array.isArray(p.receita)?p.receita:JSON.parse(p.receita||'[]');
+    for(var i=0;i<rec.length;i++){var r=rec[i],it=gi(r.tipo,r.itemId||r.item_id);if(it){var ne=Math.max(0,it.estoque-r.qtd*qty);await PATCH(r.tipo==='essencia'?'essencias':'insumos',{estoque:ne},'?id=eq.'+it.id);it.estoque=ne;}}
+    toast(tipo==='avista'?'Venda realizada! ✓':'Venda a prazo registrada!','ok');
+    document.getElementById('vqty').value='1';document.getElementById('vcli').value='';document.getElementById('vvenc').value='';document.getElementById('vresumo').style.display='none';
+    renderVend();
+  }catch(e){toast('Erro: '+e.message,'err');}finally{btn.disabled=false;}
+}
+function renderPL(){
+  var it=VEND.filter(function(v){return v.status==='pendente';});
+  document.getElementById('prazo-list').innerHTML=!it.length?'<p style="color:var(--text-hint);font-size:13px;padding:8px 0">Nenhuma conta pendente.</p>':
+    it.map(function(v){var p=PERF.find(function(p){return p.id===v.perf_id;});return'<div class="prazo-item"><div class="pi"><div class="pcli">'+(v.cliente||'—')+'</div><div class="pdet">'+(p?p.nome:'')+'&nbsp;×'+v.qty+'&nbsp;·&nbsp;Vence '+fd(v.venc)+'</div></div><span class="badge amber" style="margin-right:8px">'+fmt(v.receita_valor)+'</span><button class="btn xs success" onclick="openBaixa('+v.id+')"><i class="ti ti-cash"></i> Receber</button></div>';}).join('');
+}
+function openBaixa(id){bId=id;var v=VEND.find(function(v){return v.id===id;}),p=PERF.find(function(p){return p.id===v.perf_id;});document.getElementById('bdesc').textContent='Confirmar recebimento de '+fmt(v.receita_valor)+' de '+(v.cliente||'—')+' referente a '+(p?p.nome:'')+' × '+v.qty+'?';openModal('m-baixa');}
+async function doBaixa(){try{await PATCH('vendas',{status:'pago'},'?id=eq.'+bId);var v=VEND.find(function(v){return v.id===bId;});if(v)v.status='pago';closeModal('m-baixa');toast('Recebido! Caixa atualizado.','ok');renderVend();}catch(e){toast('Erro','err');}}
+
+/* ── CAIXA ── */
+function renderCaixa(){
+  var cx=0,lu=0,cu=0;VEND.filter(function(v){return v.status==='pago';}).forEach(function(v){cx+=v.receita_valor||0;lu+=v.lucro_valor||0;cu+=v.custo_valor||0;});
+  document.getElementById('caixa-stats').innerHTML=sc('Total em caixa','green',fmt(cx),'ti-cash','vendas pagas')+sc('Custo acumulado','red',fmt(cu),'ti-minus','insumos consumidos')+sc('Lucro líquido','purple',fmt(lu),'ti-trending-up','receita − custo');
+  var f=document.getElementById('hfiltro').value;
+  var lista=VEND.filter(function(v){if(f==='avista')return v.tipo==='avista';if(f==='prazo')return v.tipo==='prazo';if(f==='pago')return v.status==='pago';if(f==='pendente')return v.status==='pendente';return true;});
+  // Desktop table
+  document.getElementById('tbl-hist').innerHTML=!lista.length?'<tr><td colspan="9" class="tbl-empty">Nenhuma venda</td></tr>':
+    lista.map(function(v){var p=PERF.find(function(p){return p.id===v.perf_id;});return'<tr><td>'+fd(v.data)+'</td><td><strong>'+(p?p.nome:'—')+'</strong></td><td>'+v.qty+'</td><td><span class="badge '+(v.tipo==='avista'?'green':'amber')+'">'+(v.tipo==='avista'?'À vista':'A prazo')+'</span></td><td>'+(v.cliente||'—')+'</td><td>'+fmt(v.receita_valor)+'</td><td style="color:var(--red)">'+fmt(v.custo_valor)+'</td><td style="color:'+(v.lucro_valor>=0?'var(--green)':'var(--red)')+';font-weight:600">'+fmt(v.lucro_valor)+'</td><td><span class="badge '+(v.status==='pago'?'green':'red')+'">'+(v.status==='pago'?'Pago':'Pendente')+'</span></td></tr>';}).join('');
+  // Mobile list
+  document.getElementById('mlist-hist').innerHTML=!lista.length?'<p style="color:var(--text-hint);font-size:13px;text-align:center;padding:20px 0">Nenhuma venda</p>':
+    lista.map(function(v){var p=PERF.find(function(p){return p.id===v.perf_id;});return'<div class="list-card"><div class="list-card-row"><div><div class="list-card-title">'+(p?p.nome:'—')+'</div><div class="list-card-sub">'+fd(v.data)+(v.cliente?' · '+v.cliente:'')+'</div></div><span class="badge '+(v.status==='pago'?'green':'amber')+'">'+(v.status==='pago'?'Pago':'Pendente')+'</span></div><div class="list-card-meta"><div class="lc-meta-item"><div class="lm-lbl">Receita</div><div class="lm-val" style="color:var(--green)">'+fmt(v.receita_valor)+'</div></div><div class="lc-meta-item"><div class="lm-lbl">Custo</div><div class="lm-val" style="color:var(--red)">'+fmt(v.custo_valor)+'</div></div><div class="lc-meta-item"><div class="lm-lbl">Lucro</div><div class="lm-val" style="color:'+(v.lucro_valor>=0?'var(--green)':'var(--red)')+'">'+fmt(v.lucro_valor)+'</div></div><div class="lc-meta-item"><div class="lm-lbl">Tipo</div><div class="lm-val"><span class="badge '+(v.tipo==='avista'?'green':'amber')+'" style="font-size:10px">'+(v.tipo==='avista'?'À vista':'A prazo')+'</span></div></div></div></div>';}).join('');
+}
+
+/* ── Mostrar mobile lists quando necessário ── */
+function checkMobile(){
+  var mob=isMobile();
+  document.querySelectorAll('.mobile-list').forEach(function(el){el.style.display=mob?'block':'none';});
+  document.querySelectorAll('.desktop-only').forEach(function(el){el.style.display=mob?'none':'';});
+}
+window.addEventListener('resize',checkMobile);
+checkMobile();
+
+loadAll();
+</script>
+</body>
+</html>
