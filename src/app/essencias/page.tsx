@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { IconFlask, IconPlus, IconEdit, IconTrash, IconRefresh, IconAlertTriangle } from '@tabler/icons-react';
+import { IconFlask, IconPlus, IconEdit, IconTrash, IconRefresh } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
 import { Btn, Card, CardHeader, Badge } from '@/components/shared/ui';
 import EssenciaModal from '@/components/essencias/EssenciaModal';
 import ReporModal from '@/components/shared/ReporModal';
 import { fmt, fq } from '@/lib/format';
-import { essenciaEstoqueSeverity, sortByEstoqueAsc } from '@/lib/business';
+import { sortByEstoqueAsc } from '@/lib/business';
 import type { Essencia, Genero } from '@/lib/types';
 
 const GENERO_LABEL: Record<Genero, string> = {
@@ -20,17 +20,6 @@ const GENERO_COLOR: Record<Genero, 'red' | 'purple' | 'gray'> = {
   masculino: 'purple',
   compartilhavel: 'gray',
 };
-
-function EstoqueBadge({ estoque }: { estoque: number }) {
-  const sev = essenciaEstoqueSeverity(estoque);
-  if (!sev) return null;
-  return (
-    <Badge color={sev === 'critico' ? 'red' : 'amber'}>
-      <IconAlertTriangle size={11} className="mr-1" />
-      {sev === 'critico' ? 'Crítico' : 'Baixo'}
-    </Badge>
-  );
-}
 
 export default function EssenciasPage() {
   const { essencias, deleteEssencia } = useData();
@@ -104,12 +93,7 @@ export default function EssenciasPage() {
                       <Badge color={GENERO_COLOR[e.genero]}>{GENERO_LABEL[e.genero]}</Badge>
                     </td>
                     <td className="px-3 py-2.5 text-[var(--text)]">{e.fornecedor || '—'}</td>
-                    <td className="px-3 py-2.5 text-[var(--text)]">
-                      <div className="flex items-center gap-1.5">
-                        {fq(e.estoque, 'ml')}
-                        <EstoqueBadge estoque={e.estoque} />
-                      </div>
-                    </td>
+                    <td className="px-3 py-2.5 text-[var(--text)]">{fq(e.estoque, 'ml')}</td>
                     <td className="px-3 py-2.5 text-[var(--text)]">{fmt(e.custo)}</td>
                     <td className="px-3 py-2.5 text-[var(--text)]">
                       <strong>{fmt(e.unit)}</strong>/ml
@@ -156,10 +140,7 @@ export default function EssenciasPage() {
                 <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                   <div>
                     <div className="text-[11px] text-[var(--text-hint)]">Estoque</div>
-                    <div className="mt-[1px] flex items-center gap-1.5 text-[13px] font-medium text-[var(--text)]">
-                      {fq(e.estoque, 'ml')}
-                      <EstoqueBadge estoque={e.estoque} />
-                    </div>
+                    <div className="mt-[1px] text-[13px] font-medium text-[var(--text)]">{fq(e.estoque, 'ml')}</div>
                   </div>
                   <div>
                     <div className="text-[11px] text-[var(--text-hint)]">Custo global</div>

@@ -4,22 +4,6 @@ import type { AllItem, Essencia, Insumo, ItemTipo, Perfume, ReceitaItem } from '
 // e priorizar itens com pouco estoque (independente do estoque_inicial de cada uma).
 export const ESSENCIA_ESTOQUE_REF = 500;
 
-export function essenciaEstoquePct(estoque: number): number {
-  return Math.min(100, Math.round((estoque / ESSENCIA_ESTOQUE_REF) * 100));
-}
-
-export function essenciaEstoqueBaixo(estoque: number): boolean {
-  return estoque < ESSENCIA_ESTOQUE_REF;
-}
-
-export function essenciaEstoqueSeverity(estoque: number): 'critico' | 'baixo' | null {
-  if (estoque <= 0) return 'critico';
-  const pct = essenciaEstoquePct(estoque);
-  if (pct <= 10) return 'critico';
-  if (pct < 100) return 'baixo';
-  return null;
-}
-
 export function sortByEstoqueAsc<T extends { estoque: number }>(list: T[]): T[] {
   return [...list].sort((a, b) => a.estoque - b.estoque);
 }
