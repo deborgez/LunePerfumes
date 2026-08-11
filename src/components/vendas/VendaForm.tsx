@@ -113,7 +113,9 @@ export default function VendaForm() {
 
       {resumo && (
         <div className="my-2.5 rounded-[10px] border border-[var(--resumo-border)] bg-[var(--resumo-bg)] p-3.5 text-[13px]">
-          <div className="mb-2 text-xs text-[var(--text-muted)]">Insumos consumidos:</div>
+          <div className="mb-2 text-xs text-[var(--text-muted)]">
+            Insumos consumidos <span className="text-[var(--text-hint)]">(custo/lucro abaixo são apenas referência — o Caixa contabiliza só a receita)</span>:
+          </div>
           <div className="mb-2.5">
             {resumo.itens.map((it, i) => (
               <span

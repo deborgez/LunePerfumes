@@ -3,7 +3,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
 import { useToast } from './ToastContext';
 import * as q from '@/lib/queries';
-import { custo1 } from '@/lib/business';
 import { tod } from '@/lib/format';
 import type { Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
 
@@ -34,7 +33,7 @@ interface DataContextValue {
 
   savePerfume: (
     id: number | null,
-    body: { nome: string; marca: string; genero: Genero; ml: number; preco: number; receita: ReceitaItem[] }
+    body: { nome: string; marca: string; genero: Genero; inspiracao: string; ml: number; preco: number; receita: ReceitaItem[] }
   ) => Promise<boolean>;
   deletePerfume: (id: number) => Promise<void>;
 
@@ -167,7 +166,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   async function savePerfume(
     id: number | null,
-    body: { nome: string; marca: string; genero: Genero; ml: number; preco: number; receita: ReceitaItem[] }
+    body: { nome: string; marca: string; genero: Genero; inspiracao: string; ml: number; preco: number; receita: ReceitaItem[] }
   ) {
     try {
       if (id) {
@@ -206,9 +205,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const { perfId, qty, tipo, cliente, venc } = params;
     const p = perfumes.find((x) => x.id === perfId);
     if (!p) return false;
-    const c = custo1(p, essencias, insumos) * qty;
+    // O custo da receita não é mais deduzido automaticamente na venda — o valor
+    // contabilizado é a receita bruta. Custos entram separadamente no Caixa.
     const rv = p.preco * qty;
-    const lv = rv - c;
     try {
       const vr = await q.createVenda({
         perf_id: perfId,
@@ -219,8 +218,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         status: tipo === 'avista' ? 'pago' : 'pendente',
         venc: venc || null,
         receita_valor: rv,
-        custo_valor: c,
-        lucro_valor: lv,
+        custo_valor: 0,
+        lucro_valor: rv,
       });
       setVendas((prev) => [vr, ...prev]);
 
