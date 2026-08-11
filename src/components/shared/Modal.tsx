@@ -15,12 +15,7 @@ interface ModalProps {
 export default function Modal({ open, onClose, title, children, footer, maxWidth = 560 }: ModalProps) {
   if (!open) return null;
   return (
-    <div
-      className="fixed inset-0 z-[900] flex items-end justify-center bg-[rgba(10,8,30,0.55)]"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
+    <div className="fixed inset-0 z-[900] flex items-end justify-center bg-[rgba(10,8,30,0.55)]">
       <div
         className="max-h-[92vh] w-full overflow-y-auto rounded-t-[18px] border border-[var(--border)] bg-[var(--surface)] shadow-[0_-4px_40px_rgba(0,0,0,0.2)] animate-slide-up md:max-h-[92vh]"
         style={{ maxWidth }}
