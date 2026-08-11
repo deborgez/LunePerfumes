@@ -5,7 +5,7 @@ import Modal from '@/components/shared/Modal';
 import { Btn, FormGroup, Input, Select } from '@/components/shared/ui';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { br, fmt } from '@/lib/format';
-import { allItems, gi } from '@/lib/business';
+import { allItems, buildDefaultReceita, gi } from '@/lib/business';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
 import type { Genero, Perfume, ReceitaItem } from '@/lib/types';
@@ -22,6 +22,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
   const [nome, setNome] = useState('');
   const [marca, setMarca] = useState('');
   const [genero, setGenero] = useState<Genero>('compartilhavel');
+  const [inspiracao, setInspiracao] = useState('');
   const [ml, setMl] = useState('');
   const [preco, setPreco] = useState('');
   const [recRows, setRecRows] = useState<ReceitaItem[]>([]);
@@ -36,6 +37,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       setNome(editing.nome);
       setMarca(editing.marca);
       setGenero(editing.genero || 'compartilhavel');
+      setInspiracao(editing.inspiracao || '');
       setMl(editing.ml.toString());
       setPreco(editing.preco.toFixed(2).replace('.', ','));
       const rec: ReceitaItem[] = Array.isArray(editing.receita)
@@ -46,11 +48,13 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       setNome('');
       setMarca('');
       setGenero('compartilhavel');
+      setInspiracao('');
       setMl('');
       setPreco('');
-      setRecRows([]);
+      setRecRows(buildDefaultReceita(essencias, insumos));
     }
     /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- essencias/insumos intentionally excluded: only reinitialize on open/editing change, not on background data refresh
   }, [open, editing]);
 
   function addRow() {
@@ -93,6 +97,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       nome: nomeT,
       marca: marcaT,
       genero,
+      inspiracao: inspiracao.trim(),
       ml: mlN,
       preco: precoV,
       receita: recRows.map((r) => ({ tipo: r.tipo, itemId: r.itemId, qtd: r.qtd })),
@@ -141,6 +146,9 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
             <option value="masculino">Masculino</option>
             <option value="compartilhavel">Compartilhável</option>
           </Select>
+        </FormGroup>
+        <FormGroup label="Inspiração (opcional)">
+          <Input placeholder="Ex: Bleu de Chanel" value={inspiracao} onChange={(e) => setInspiracao(e.target.value)} />
         </FormGroup>
       </div>
 

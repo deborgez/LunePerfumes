@@ -77,6 +77,7 @@ export default function EssenciasPage() {
                   <tr key={e.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
                     <td className="px-3 py-2.5 text-[var(--text)]">
                       <strong>{e.nome}</strong>
+                      {e.inspiracao && <div className="mt-0.5 text-[11px] text-[var(--text-hint)]">Insp.: {e.inspiracao}</div>}
                     </td>
                     <td className="px-3 py-2.5 text-[var(--text)]">{e.marca || '—'}</td>
                     <td className="px-3 py-2.5">
@@ -121,6 +122,7 @@ export default function EssenciasPage() {
                     <div className="mt-[3px] text-xs text-[var(--text-muted)]">
                       {e.marca || 'Sem marca'} · {e.fornecedor || 'Sem fornecedor'}
                     </div>
+                    {e.inspiracao && <div className="mt-0.5 text-xs text-[var(--text-hint)]">Insp.: {e.inspiracao}</div>}
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <Badge color="purple">{fmt(e.unit)}/ml</Badge>

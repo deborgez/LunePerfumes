@@ -20,6 +20,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
   const [nome, setNome] = useState('');
   const [marca, setMarca] = useState('');
   const [genero, setGenero] = useState<Genero>('compartilhavel');
+  const [inspiracao, setInspiracao] = useState('');
   const [forn, setForn] = useState('');
   const [est, setEst] = useState('');
   const [cst, setCst] = useState('');
@@ -32,6 +33,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       setNome(editing.nome);
       setMarca(editing.marca || '');
       setGenero(editing.genero || 'compartilhavel');
+      setInspiracao(editing.inspiracao || '');
       setForn(editing.fornecedor || '');
       setEst(editing.estoque.toString());
       setCst(editing.custo.toFixed(2).replace('.', ','));
@@ -39,6 +41,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       setNome('');
       setMarca('');
       setGenero('compartilhavel');
+      setInspiracao('');
       setForn('');
       setEst('');
       setCst('');
@@ -53,6 +56,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
   async function handleSave() {
     const nomeT = nome.trim();
     const marcaT = marca.trim();
+    const inspiracaoT = inspiracao.trim();
     const fornT = forn.trim();
     if (!nomeT || estN < 0 || cstN < 0) {
       toast('Preencha o nome da essência', 'err');
@@ -63,6 +67,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       nome: nomeT,
       marca: marcaT,
       genero,
+      inspiracao: inspiracaoT,
       fornecedor: fornT,
       estoque: estN,
       estoque_inicial: editing ? editing.estoque_inicial : estN,
@@ -107,6 +112,11 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
         </FormGroup>
         <FormGroup label="Fornecedor (opcional)">
           <Input placeholder="Ex: Distribuidor X..." value={forn} onChange={(e) => setForn(e.target.value)} />
+        </FormGroup>
+      </div>
+      <div className="mb-2.5">
+        <FormGroup label="Inspiração (opcional)">
+          <Input placeholder="Ex: Bleu de Chanel" value={inspiracao} onChange={(e) => setInspiracao(e.target.value)} />
         </FormGroup>
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">

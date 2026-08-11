@@ -19,6 +19,21 @@ export function allItems(ess: Essencia[], ins: Insumo[]): AllItem[] {
   ];
 }
 
+// Itens de insumo que toda receita de produção costuma usar — pré-preenchidos
+// ao criar um novo perfume (o usuário pode editar/remover livremente).
+const RECEITA_PADRAO_INSUMOS = ['Base', 'Frasco', 'Etiqueta', 'Caixa'];
+
+export function buildDefaultReceita(ess: Essencia[], ins: Insumo[]): ReceitaItem[] {
+  const rows: ReceitaItem[] = [];
+  if (ess.length) rows.push({ tipo: 'essencia', itemId: ess[0].id, qtd: 0 });
+  RECEITA_PADRAO_INSUMOS.forEach((nome) => {
+    const needle = nome.toLowerCase();
+    const match = ins.find((i) => i.nome.trim().toLowerCase().includes(needle));
+    if (match) rows.push({ tipo: 'insumo', itemId: match.id, qtd: 0 });
+  });
+  return rows;
+}
+
 export function receitaOf(p: Perfume): ReceitaItem[] {
   return Array.isArray(p.receita) ? p.receita : JSON.parse((p.receita as unknown as string) || '[]');
 }

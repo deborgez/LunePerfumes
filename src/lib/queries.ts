@@ -56,6 +56,7 @@ export async function createPerfume(body: {
   nome: string;
   marca: string;
   genero: Genero;
+  inspiracao: string;
   ml: number;
   preco: number;
   receita: ReceitaItem[];
@@ -66,7 +67,7 @@ export async function createPerfume(body: {
 }
 export async function updatePerfume(
   id: number,
-  body: { nome: string; marca: string; genero: Genero; ml: number; preco: number; receita: ReceitaItem[] }
+  body: { nome: string; marca: string; genero: Genero; inspiracao: string; ml: number; preco: number; receita: ReceitaItem[] }
 ): Promise<Perfume> {
   const { data, error } = await supabase.from('perfumes').update(body).eq('id', id).select();
   if (error) throw error;

@@ -73,6 +73,7 @@ export default function PerfumesPage() {
                     <tr key={p.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
                       <td className="px-3 py-2.5 text-[var(--text)]">
                         <strong>{p.nome}</strong>
+                        {p.inspiracao && <div className="mt-0.5 text-[11px] text-[var(--text-hint)]">Insp.: {p.inspiracao}</div>}
                       </td>
                       <td className="px-3 py-2.5 text-[var(--text)]">{p.marca}</td>
                       <td className="px-3 py-2.5">
@@ -124,6 +125,7 @@ export default function PerfumesPage() {
                       <div className="mt-[3px] text-xs text-[var(--text-muted)]">
                         {p.marca} · {p.ml} ml
                       </div>
+                      {p.inspiracao && <div className="mt-0.5 text-xs text-[var(--text-hint)]">Insp.: {p.inspiracao}</div>}
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <Badge color={mg >= 30 ? 'green' : mg >= 10 ? 'amber' : 'red'}>{mg}% margem</Badge>

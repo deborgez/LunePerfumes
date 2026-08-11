@@ -9,6 +9,7 @@ export interface Essencia {
   nome: string;
   marca: string | null;
   genero: Genero;
+  inspiracao: string | null;
   fornecedor: string | null;
   estoque: number;
   estoque_inicial: number;
@@ -40,6 +41,7 @@ export interface Perfume {
   nome: string;
   marca: string;
   genero: Genero;
+  inspiracao: string | null;
   ml: number;
   preco: number;
   receita: ReceitaItem[];
