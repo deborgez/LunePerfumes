@@ -178,7 +178,8 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
                 size="sm"
                 value={r.qtd}
                 onChange={(v) => updateRowQtd(i, v)}
-                placeholder="0,00"
+                placeholder={cur?.tu === 'un' ? '0' : '0,00'}
+                decimals={cur?.tu === 'un' ? 0 : 2}
                 className="w-[100px] md:w-20"
               />
               <span className="min-w-6 text-center text-[11px] text-[var(--text-hint)]">{cur?.tu || 'un'}</span>

@@ -62,11 +62,18 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
-function formatCents(cents: number): string {
-  const v = (Math.abs(cents) / 100).toFixed(2);
+function withThousandsSep(intPart: string): string {
+  return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function formatUnits(units: number, decimals: number): string {
+  const negative = units < 0;
+  const abs = Math.abs(units);
+  const str = (negative ? '-' : '') + withThousandsSep(String(abs));
+  if (decimals === 0) return str;
+  const v = (abs / 10 ** decimals).toFixed(decimals);
   const [int, dec] = v.split('.');
-  const withThousands = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return (cents < 0 ? '-' : '') + withThousands + ',' + dec;
+  return (negative ? '-' : '') + withThousandsSep(int) + ',' + dec;
 }
 
 interface MaskedDecimalInputProps {
@@ -76,18 +83,20 @@ interface MaskedDecimalInputProps {
   className?: string;
   size?: 'md' | 'sm';
   id?: string;
+  /** Casas decimais exibidas (padrão 2). Use 0 para campos unitários (só números inteiros). */
+  decimals?: number;
 }
 
 /** Input que se comporta como caixa eletrônico: só aceita dígitos, que preenchem
- *  da direita pra esquerda, sempre mostrando duas casas decimais (Ex: digitar
- *  1-5-0-0-0 vira "150,00"). */
-export function MaskedDecimalInput({ value, onChange, placeholder, className = '', size = 'md', id }: MaskedDecimalInputProps) {
-  const cents = Math.round((value || 0) * 100);
-  const display = cents === 0 ? '' : formatCents(cents);
+ *  da direita pra esquerda, sempre mostrando `decimals` casas decimais (Ex: digitar
+ *  1-5-0-0-0 vira "150,00" com decimals=2). Com decimals=0 vira um inteiro comum. */
+export function MaskedDecimalInput({ value, onChange, placeholder, className = '', size = 'md', id, decimals = 2 }: MaskedDecimalInputProps) {
+  const units = Math.round((value || 0) * 10 ** decimals);
+  const display = units === 0 ? '' : formatUnits(units, decimals);
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const digits = e.target.value.replace(/\D/g, '');
-    onChange((digits === '' ? 0 : parseInt(digits, 10)) / 100);
+    onChange((digits === '' ? 0 : parseInt(digits, 10)) / 10 ** decimals);
   }
 
   const sizeClass =

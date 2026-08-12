@@ -91,7 +91,7 @@ export default function InsumoModal({ open, onClose, editing }: InsumoModalProps
           </Select>
         </FormGroup>
         <FormGroup label={estLabel}>
-          <MaskedDecimalInput value={est} onChange={setEst} placeholder="0,00" />
+          <MaskedDecimalInput value={est} onChange={setEst} placeholder={tipo === 'un' ? '0' : '0,00'} decimals={tipo === 'un' ? 0 : 2} />
         </FormGroup>
       </div>
       <div className="mb-2.5">
