@@ -130,7 +130,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <FormGroup label="Volume (ml)">
-          <MaskedDecimalInput value={ml} onChange={setMl} placeholder="0,00" />
+          <MaskedDecimalInput value={ml} onChange={setMl} placeholder="0" decimals={0} />
         </FormGroup>
         <FormGroup label="Preço de venda (R$)">
           <MaskedDecimalInput value={preco} onChange={setPreco} placeholder="0,00" />
@@ -178,8 +178,8 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
                 size="sm"
                 value={r.qtd}
                 onChange={(v) => updateRowQtd(i, v)}
-                placeholder={cur?.tu === 'un' ? '0' : '0,00'}
-                decimals={cur?.tu === 'un' ? 0 : 2}
+                placeholder="0"
+                decimals={0}
                 className="w-[100px] md:w-20"
               />
               <span className="min-w-6 text-center text-[11px] text-[var(--text-hint)]">{cur?.tu || 'un'}</span>

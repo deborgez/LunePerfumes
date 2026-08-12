@@ -60,7 +60,7 @@ export default function ReporModal({ open, onClose, tipo, item }: ReporModalProp
       </p>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <FormGroup label={`Adicionar ao estoque (${unid})`}>
-          <MaskedDecimalInput value={qtd} onChange={setQtd} placeholder={unid === 'un' ? '0' : '0,00'} decimals={unid === 'un' ? 0 : 2} />
+          <MaskedDecimalInput value={qtd} onChange={setQtd} placeholder="0" decimals={0} />
         </FormGroup>
         <FormGroup label="Novo custo global (R$)">
           <MaskedDecimalInput value={custo} onChange={setCusto} placeholder="Opcional" />

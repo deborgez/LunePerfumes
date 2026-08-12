@@ -119,7 +119,7 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <FormGroup label="Estoque (ml)">
-          <MaskedDecimalInput value={est} onChange={setEst} placeholder="0,00 (ou 0 para só cadastrar)" />
+          <MaskedDecimalInput value={est} onChange={setEst} placeholder="0 (ou 0 para só cadastrar)" decimals={0} />
         </FormGroup>
         <FormGroup label="Custo global (R$)">
           <MaskedDecimalInput value={cst} onChange={setCst} placeholder="0,00" />
