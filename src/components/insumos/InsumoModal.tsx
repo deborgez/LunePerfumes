@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Modal from '@/components/shared/Modal';
-import { Btn, FormGroup, Hint, Input, Select } from '@/components/shared/ui';
-import { br, fmt } from '@/lib/format';
+import { Btn, FormGroup, Hint, Input, MaskedDecimalInput, Select } from '@/components/shared/ui';
+import { fmt } from '@/lib/format';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
 import type { Insumo, InsumoTipo } from '@/lib/types';
@@ -19,8 +19,8 @@ export default function InsumoModal({ open, onClose, editing }: InsumoModalProps
   const toast = useToast();
   const [nome, setNome] = useState('');
   const [tipo, setTipo] = useState<InsumoTipo>('ml');
-  const [est, setEst] = useState('');
-  const [cst, setCst] = useState('');
+  const [est, setEst] = useState(0);
+  const [cst, setCst] = useState(0);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -29,25 +29,23 @@ export default function InsumoModal({ open, onClose, editing }: InsumoModalProps
     if (editing) {
       setNome(editing.nome);
       setTipo(editing.tipo);
-      setEst(editing.estoque.toString());
-      setCst(editing.custo.toFixed(2).replace('.', ','));
+      setEst(editing.estoque);
+      setCst(editing.custo);
     } else {
       setNome('');
       setTipo('ml');
-      setEst('');
-      setCst('');
+      setEst(0);
+      setCst(0);
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [open, editing]);
 
-  const estN = br(est);
-  const cstN = br(cst);
-  const showHint = estN > 0 && cstN > 0;
+  const showHint = est > 0 && cst > 0;
   const estLabel = tipo === 'ml' ? 'Estoque total (ml)' : 'Quantidade em estoque';
 
   async function handleSave() {
     const nomeT = nome.trim();
-    if (!nomeT || estN <= 0 || cstN <= 0) {
+    if (!nomeT || est <= 0 || cst <= 0) {
       toast('Preencha todos os campos', 'err');
       return;
     }
@@ -55,10 +53,10 @@ export default function InsumoModal({ open, onClose, editing }: InsumoModalProps
     const ok = await saveInsumo(editing ? editing.id : null, {
       nome: nomeT,
       tipo,
-      estoque: estN,
-      estoque_inicial: editing ? editing.estoque_inicial : estN,
-      custo: cstN,
-      unit: cstN / estN,
+      estoque: est,
+      estoque_inicial: editing ? editing.estoque_inicial : est,
+      custo: cst,
+      unit: cst / est,
     });
     setSaving(false);
     if (ok) onClose();
@@ -93,17 +91,17 @@ export default function InsumoModal({ open, onClose, editing }: InsumoModalProps
           </Select>
         </FormGroup>
         <FormGroup label={estLabel}>
-          <Input inputMode="decimal" placeholder="Ex: 1000" value={est} onChange={(e) => setEst(e.target.value)} />
+          <MaskedDecimalInput value={est} onChange={setEst} placeholder="0,00" />
         </FormGroup>
       </div>
       <div className="mb-2.5">
         <FormGroup label="Custo global (R$)">
-          <Input inputMode="decimal" placeholder="Ex: 120,00" value={cst} onChange={(e) => setCst(e.target.value)} />
+          <MaskedDecimalInput value={cst} onChange={setCst} placeholder="0,00" />
         </FormGroup>
       </div>
       {showHint && (
         <Hint>
-          Custo por {tipo === 'ml' ? 'ml' : 'unidade'}: <strong>{fmt(cstN / estN)}</strong>
+          Custo por {tipo === 'ml' ? 'ml' : 'unidade'}: <strong>{fmt(cst / est)}</strong>
         </Hint>
       )}
     </Modal>

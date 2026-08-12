@@ -1,6 +1,6 @@
 'use client';
 
-import { ButtonHTMLAttributes, InputHTMLAttributes, LabelHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
+import { ButtonHTMLAttributes, ChangeEvent, InputHTMLAttributes, LabelHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
 
 type Variant = 'default' | 'primary' | 'success' | 'danger';
 type Size = 'md' | 'sm' | 'xs';
@@ -58,6 +58,52 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
     <input
       className={`rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--text-hint)] focus:border-[var(--brand)] focus:shadow-[0_0_0_3px_rgba(127,119,221,0.15)] max-md:px-3.5 max-md:py-3 max-md:text-base ${className}`}
       {...rest}
+    />
+  );
+}
+
+function formatCents(cents: number): string {
+  const v = (Math.abs(cents) / 100).toFixed(2);
+  const [int, dec] = v.split('.');
+  const withThousands = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (cents < 0 ? '-' : '') + withThousands + ',' + dec;
+}
+
+interface MaskedDecimalInputProps {
+  value: number;
+  onChange: (value: number) => void;
+  placeholder?: string;
+  className?: string;
+  size?: 'md' | 'sm';
+  id?: string;
+}
+
+/** Input que se comporta como caixa eletrônico: só aceita dígitos, que preenchem
+ *  da direita pra esquerda, sempre mostrando duas casas decimais (Ex: digitar
+ *  1-5-0-0-0 vira "150,00"). */
+export function MaskedDecimalInput({ value, onChange, placeholder, className = '', size = 'md', id }: MaskedDecimalInputProps) {
+  const cents = Math.round((value || 0) * 100);
+  const display = cents === 0 ? '' : formatCents(cents);
+
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    const digits = e.target.value.replace(/\D/g, '');
+    onChange((digits === '' ? 0 : parseInt(digits, 10)) / 100);
+  }
+
+  const sizeClass =
+    size === 'sm'
+      ? 'rounded-md px-2 py-[7px] text-[13px]'
+      : 'rounded-lg px-3 py-2.5 text-sm max-md:px-3.5 max-md:py-3 max-md:text-base';
+
+  return (
+    <input
+      id={id}
+      type="text"
+      inputMode="numeric"
+      value={display}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={`border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--text-hint)] focus:border-[var(--brand)] focus:shadow-[0_0_0_3px_rgba(127,119,221,0.15)] ${sizeClass} ${className}`}
     />
   );
 }

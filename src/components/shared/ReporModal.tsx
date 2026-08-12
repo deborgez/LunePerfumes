@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Modal from './Modal';
-import { Btn, FormGroup, Input } from './ui';
-import { br, fq } from '@/lib/format';
+import { Btn, FormGroup, MaskedDecimalInput } from './ui';
+import { fq } from '@/lib/format';
 import { useData } from '@/context/DataContext';
 import type { Essencia, Insumo } from '@/lib/types';
 
@@ -16,8 +16,8 @@ interface ReporModalProps {
 
 export default function ReporModal({ open, onClose, tipo, item }: ReporModalProps) {
   const { reporEstoque } = useData();
-  const [qtd, setQtd] = useState('');
-  const [custo, setCusto] = useState('');
+  const [qtd, setQtd] = useState(0);
+  const [custo, setCusto] = useState(0);
   const [saving, setSaving] = useState(false);
 
   if (!item) return null;
@@ -25,16 +25,16 @@ export default function ReporModal({ open, onClose, tipo, item }: ReporModalProp
 
   async function handleSave() {
     setSaving(true);
-    await reporEstoque(tipo, item!.id, br(qtd) || 0, br(custo));
+    await reporEstoque(tipo, item!.id, qtd, custo);
     setSaving(false);
-    setQtd('');
-    setCusto('');
+    setQtd(0);
+    setCusto(0);
     onClose();
   }
 
   function handleClose() {
-    setQtd('');
-    setCusto('');
+    setQtd(0);
+    setCusto(0);
     onClose();
   }
 
@@ -60,10 +60,10 @@ export default function ReporModal({ open, onClose, tipo, item }: ReporModalProp
       </p>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <FormGroup label={`Adicionar ao estoque (${unid})`}>
-          <Input inputMode="decimal" placeholder="0" value={qtd} onChange={(e) => setQtd(e.target.value)} />
+          <MaskedDecimalInput value={qtd} onChange={setQtd} placeholder="0,00" />
         </FormGroup>
         <FormGroup label="Novo custo global (R$)">
-          <Input inputMode="decimal" placeholder="Opcional" value={custo} onChange={(e) => setCusto(e.target.value)} />
+          <MaskedDecimalInput value={custo} onChange={setCusto} placeholder="Opcional" />
         </FormGroup>
       </div>
     </Modal>

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Modal from '@/components/shared/Modal';
-import { Btn, FormGroup, Input, Select } from '@/components/shared/ui';
+import { Btn, FormGroup, Input, MaskedDecimalInput, Select } from '@/components/shared/ui';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
-import { br, fmt } from '@/lib/format';
+import { fmt } from '@/lib/format';
 import { allItems, buildDefaultReceita, gi } from '@/lib/business';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
@@ -23,8 +23,8 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
   const [marca, setMarca] = useState('');
   const [genero, setGenero] = useState<Genero>('compartilhavel');
   const [inspiracao, setInspiracao] = useState('');
-  const [ml, setMl] = useState('');
-  const [preco, setPreco] = useState('');
+  const [ml, setMl] = useState(0);
+  const [preco, setPreco] = useState(0);
   const [recRows, setRecRows] = useState<ReceitaItem[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -38,8 +38,8 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       setMarca(editing.marca);
       setGenero(editing.genero || 'compartilhavel');
       setInspiracao(editing.inspiracao || '');
-      setMl(editing.ml.toString());
-      setPreco(editing.preco.toFixed(2).replace('.', ','));
+      setMl(editing.ml);
+      setPreco(editing.preco);
       const rec: ReceitaItem[] = Array.isArray(editing.receita)
         ? editing.receita
         : JSON.parse((editing.receita as unknown as string) || '[]');
@@ -49,8 +49,8 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       setMarca('');
       setGenero('compartilhavel');
       setInspiracao('');
-      setMl('');
-      setPreco('');
+      setMl(0);
+      setPreco(0);
       setRecRows(buildDefaultReceita(essencias, insumos));
     }
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -79,16 +79,13 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
     const it = gi(r.tipo, r.itemId, essencias, insumos);
     return it ? c + it.unit * r.qtd : c;
   }, 0);
-  const precoN = br(preco);
-  const lucro = isNaN(precoN) ? -custo : precoN - custo;
-  const margem = isNaN(precoN) || precoN <= 0 ? 0 : Math.round((lucro / precoN) * 100);
+  const lucro = preco - custo;
+  const margem = preco <= 0 ? 0 : Math.round((lucro / preco) * 100);
 
   async function handleSave() {
     const nomeT = nome.trim();
     const marcaT = marca.trim();
-    const mlN = parseFloat(ml);
-    const precoV = br(preco);
-    if (!nomeT || !marcaT || isNaN(mlN) || isNaN(precoV)) {
+    if (!nomeT || !marcaT) {
       toast('Preencha todos os campos', 'err');
       return;
     }
@@ -98,8 +95,8 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       marca: marcaT,
       genero,
       inspiracao: inspiracao.trim(),
-      ml: mlN,
-      preco: precoV,
+      ml,
+      preco,
       receita: recRows.map((r) => ({ tipo: r.tipo, itemId: r.itemId, qtd: r.qtd })),
     });
     setSaving(false);
@@ -133,10 +130,10 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <FormGroup label="Volume (ml)">
-          <Input type="number" inputMode="decimal" placeholder="50" value={ml} onChange={(e) => setMl(e.target.value)} />
+          <MaskedDecimalInput value={ml} onChange={setMl} placeholder="0,00" />
         </FormGroup>
         <FormGroup label="Preço de venda (R$)">
-          <Input inputMode="decimal" placeholder="89,90" value={preco} onChange={(e) => setPreco(e.target.value)} />
+          <MaskedDecimalInput value={preco} onChange={setPreco} placeholder="0,00" />
         </FormGroup>
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
@@ -177,14 +174,12 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
                   </option>
                 ))}
               </select>
-              <input
-                type="number"
-                min={0}
-                step={0.1}
-                inputMode="decimal"
+              <MaskedDecimalInput
+                size="sm"
                 value={r.qtd}
-                onChange={(e) => updateRowQtd(i, parseFloat(e.target.value) || 0)}
-                className="w-[100px] rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-[7px] text-[13px] text-[var(--text)] outline-none md:w-20"
+                onChange={(v) => updateRowQtd(i, v)}
+                placeholder="0,00"
+                className="w-[100px] md:w-20"
               />
               <span className="min-w-6 text-center text-[11px] text-[var(--text-hint)]">{cur?.tu || 'un'}</span>
               <Btn size="xs" variant="danger" onClick={() => removeRow(i)}>

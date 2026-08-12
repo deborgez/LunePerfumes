@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Modal from '@/components/shared/Modal';
-import { Btn, FormGroup, Hint, Input, Select } from '@/components/shared/ui';
-import { br, fmt } from '@/lib/format';
+import { Btn, FormGroup, Hint, Input, MaskedDecimalInput, Select } from '@/components/shared/ui';
+import { fmt } from '@/lib/format';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
 import type { Essencia, Genero } from '@/lib/types';
@@ -22,8 +22,8 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
   const [genero, setGenero] = useState<Genero>('compartilhavel');
   const [inspiracao, setInspiracao] = useState('');
   const [forn, setForn] = useState('');
-  const [est, setEst] = useState('');
-  const [cst, setCst] = useState('');
+  const [est, setEst] = useState(0);
+  const [cst, setCst] = useState(0);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -35,30 +35,28 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       setGenero(editing.genero || 'compartilhavel');
       setInspiracao(editing.inspiracao || '');
       setForn(editing.fornecedor || '');
-      setEst(editing.estoque.toString());
-      setCst(editing.custo.toFixed(2).replace('.', ','));
+      setEst(editing.estoque);
+      setCst(editing.custo);
     } else {
       setNome('');
       setMarca('');
       setGenero('compartilhavel');
       setInspiracao('');
       setForn('');
-      setEst('');
-      setCst('');
+      setEst(0);
+      setCst(0);
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [open, editing]);
 
-  const estN = br(est);
-  const cstN = br(cst);
-  const showHint = estN > 0 && cstN > 0;
+  const showHint = est > 0 && cst > 0;
 
   async function handleSave() {
     const nomeT = nome.trim();
     const marcaT = marca.trim();
     const inspiracaoT = inspiracao.trim();
     const fornT = forn.trim();
-    if (!nomeT || estN < 0 || cstN < 0) {
+    if (!nomeT || est < 0 || cst < 0) {
       toast('Preencha o nome da essência', 'err');
       return;
     }
@@ -69,10 +67,10 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       genero,
       inspiracao: inspiracaoT,
       fornecedor: fornT,
-      estoque: estN,
-      estoque_inicial: editing ? editing.estoque_inicial : estN,
-      custo: cstN,
-      unit: estN > 0 ? cstN / estN : 0,
+      estoque: est,
+      estoque_inicial: editing ? editing.estoque_inicial : est,
+      custo: cst,
+      unit: est > 0 ? cst / est : 0,
     });
     setSaving(false);
     if (ok) onClose();
@@ -121,15 +119,15 @@ export default function EssenciaModal({ open, onClose, editing }: EssenciaModalP
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
         <FormGroup label="Estoque (ml)">
-          <Input inputMode="decimal" placeholder="Ex: 500 (ou 0 para só cadastrar)" value={est} onChange={(e) => setEst(e.target.value)} />
+          <MaskedDecimalInput value={est} onChange={setEst} placeholder="0,00 (ou 0 para só cadastrar)" />
         </FormGroup>
         <FormGroup label="Custo global (R$)">
-          <Input inputMode="decimal" placeholder="Ex: 150,00" value={cst} onChange={(e) => setCst(e.target.value)} />
+          <MaskedDecimalInput value={cst} onChange={setCst} placeholder="0,00" />
         </FormGroup>
       </div>
       {showHint && (
         <Hint>
-          Custo por ml: <strong>{fmt(cstN / estN)}</strong>
+          Custo por ml: <strong>{fmt(cst / est)}</strong>
         </Hint>
       )}
     </Modal>
