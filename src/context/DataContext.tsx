@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState, ReactNode 
 import { useToast } from './ToastContext';
 import * as q from '@/lib/queries';
 import { tod } from '@/lib/format';
-import type { Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
+import type { Cliente, Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
 
 type SyncStatus = 'spin' | 'ok' | 'err';
 
@@ -13,6 +13,7 @@ interface DataContextValue {
   insumos: Insumo[];
   perfumes: Perfume[];
   vendas: Venda[];
+  clientes: Cliente[];
   syncStatus: SyncStatus;
   syncMsg: string;
   loading: boolean;
@@ -37,12 +38,18 @@ interface DataContextValue {
   ) => Promise<boolean>;
   deletePerfume: (id: number) => Promise<void>;
 
+  saveCliente: (id: number | null, body: Omit<Cliente, 'id' | 'created_at'>) => Promise<boolean>;
+  deleteCliente: (id: number) => Promise<void>;
+
   vender: (params: {
     perfId: number;
     qty: number;
     tipo: 'avista' | 'prazo';
     cliente: string;
+    clienteId: number | null;
     venc: string;
+    parcelado: boolean;
+    parcelas: number;
   }) => Promise<boolean>;
   baixarVenda: (id: number) => Promise<void>;
 }
@@ -55,6 +62,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
   const [vendas, setVendas] = useState<Venda[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('spin');
   const [syncMsg, setSyncMsg] = useState('Conectando...');
   const [loading, setLoading] = useState(true);
@@ -63,16 +71,18 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setSyncStatus('spin');
     setSyncMsg('Sincronizando...');
     try {
-      const [ess, ins, perf, vend] = await Promise.all([
+      const [ess, ins, perf, vend, cli] = await Promise.all([
         q.getEssencias(),
         q.getInsumos(),
         q.getPerfumes(),
         q.getVendas(),
+        q.getClientes(),
       ]);
       setEssencias(ess);
       setInsumos(ins);
       setPerfumes(perf);
       setVendas(vend);
+      setClientes(cli);
       setSyncStatus('ok');
       setSyncMsg('Sincronizado');
       setLoading(false);
@@ -195,33 +205,101 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function saveCliente(id: number | null, body: Omit<Cliente, 'id' | 'created_at'>) {
+    try {
+      if (id) {
+        const r = await q.updateCliente(id, body);
+        setClientes((prev) => prev.map((x) => (x.id === id ? r : x)));
+        toast('Cliente atualizado!', 'ok');
+      } else {
+        const r = await q.createCliente(body);
+        setClientes((prev) => [...prev, r]);
+        toast('Cliente cadastrado!', 'ok');
+      }
+      return true;
+    } catch (e) {
+      toast('Erro: ' + (e as Error).message, 'err');
+      return false;
+    }
+  }
+
+  async function deleteClienteFn(id: number) {
+    try {
+      await q.deleteCliente(id);
+      setClientes((prev) => prev.filter((x) => x.id !== id));
+      toast('Removido');
+    } catch {
+      toast('Erro', 'err');
+    }
+  }
+
   async function vender(params: {
     perfId: number;
     qty: number;
     tipo: 'avista' | 'prazo';
     cliente: string;
+    clienteId: number | null;
     venc: string;
+    parcelado: boolean;
+    parcelas: number;
   }) {
-    const { perfId, qty, tipo, cliente, venc } = params;
+    const { perfId, qty, tipo, cliente, clienteId, venc, parcelado, parcelas } = params;
     const p = perfumes.find((x) => x.id === perfId);
     if (!p) return false;
     // O custo da receita não é mais deduzido automaticamente na venda — o valor
     // contabilizado é a receita bruta. Custos entram separadamente no Caixa.
     const rv = p.preco * qty;
+    const numParcelas = tipo === 'prazo' && parcelado && parcelas > 1 ? parcelas : 1;
+
     try {
-      const vr = await q.createVenda({
-        perf_id: perfId,
-        qty,
-        tipo,
-        cliente: cliente || '',
-        data: tod(),
-        status: tipo === 'avista' ? 'pago' : 'pendente',
-        venc: venc || null,
-        receita_valor: rv,
-        custo_valor: 0,
-        lucro_valor: rv,
-      });
-      setVendas((prev) => [vr, ...prev]);
+      let bodies: q.VendaInsert[];
+      if (numParcelas > 1) {
+        const totalCents = Math.round(rv * 100);
+        const baseCents = Math.floor(totalCents / numParcelas);
+        const remainderCents = totalCents - baseCents * numParcelas;
+        const vencBase = new Date(venc + 'T00:00:00');
+        bodies = Array.from({ length: numParcelas }, (_, i) => {
+          const cents = baseCents + (i === 0 ? remainderCents : 0);
+          const d = new Date(vencBase);
+          d.setDate(d.getDate() + 30 * i);
+          return {
+            perf_id: perfId,
+            qty,
+            tipo,
+            cliente: cliente || '',
+            cliente_id: clienteId,
+            data: tod(),
+            status: 'pendente',
+            venc: d.toISOString().split('T')[0],
+            parcela_num: i + 1,
+            parcela_total: numParcelas,
+            receita_valor: cents / 100,
+            custo_valor: 0,
+            lucro_valor: cents / 100,
+          };
+        });
+      } else {
+        bodies = [
+          {
+            perf_id: perfId,
+            qty,
+            tipo,
+            cliente: cliente || '',
+            cliente_id: clienteId,
+            data: tod(),
+            status: tipo === 'avista' ? 'pago' : 'pendente',
+            venc: venc || null,
+            parcela_num: null,
+            parcela_total: null,
+            receita_valor: rv,
+            custo_valor: 0,
+            lucro_valor: rv,
+          },
+        ];
+      }
+
+      const vrs = await q.createVendas(bodies);
+      setVendas((prev) => [...vrs, ...prev]);
 
       const rec = Array.isArray(p.receita) ? p.receita : JSON.parse((p.receita as unknown as string) || '[]');
       for (const r of rec) {
@@ -238,7 +316,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-      toast(tipo === 'avista' ? 'Venda realizada! ✓' : 'Venda a prazo registrada!', 'ok');
+      toast(tipo === 'avista' ? 'Venda realizada! ✓' : numParcelas > 1 ? `Venda parcelada em ${numParcelas}x registrada!` : 'Venda a prazo registrada!', 'ok');
       return true;
     } catch (e) {
       toast('Erro: ' + (e as Error).message, 'err');
@@ -264,6 +342,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         insumos,
         perfumes,
         vendas,
+        clientes,
         syncStatus,
         syncMsg,
         loading,
@@ -275,6 +354,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         reporEstoque,
         savePerfume,
         deletePerfume: deletePerfumeFn,
+        saveCliente,
+        deleteCliente: deleteClienteFn,
         vender,
         baixarVenda,
       }}

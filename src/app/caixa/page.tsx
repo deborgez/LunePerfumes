@@ -84,6 +84,9 @@ export default function CaixaPage() {
                       <td className="px-3 py-2.5 text-[var(--text)]">{fd(v.data)}</td>
                       <td className="px-3 py-2.5 text-[var(--text)]">
                         <strong>{p ? p.nome : '—'}</strong>
+                        {v.parcela_num && v.parcela_total ? (
+                          <div className="mt-0.5 text-[11px] text-[var(--text-hint)]">Parcela {v.parcela_num}/{v.parcela_total}</div>
+                        ) : null}
                       </td>
                       <td className="px-3 py-2.5 text-[var(--text)]">{v.qty}</td>
                       <td className="px-3 py-2.5">
@@ -123,6 +126,7 @@ export default function CaixaPage() {
                       <div className="mt-[3px] text-xs text-[var(--text-muted)]">
                         {fd(v.data)}
                         {v.cliente ? ` · ${v.cliente}` : ''}
+                        {v.parcela_num && v.parcela_total ? ` · Parcela ${v.parcela_num}/${v.parcela_total}` : ''}
                       </div>
                     </div>
                     <Badge color={v.status === 'pago' ? 'green' : 'amber'}>{v.status === 'pago' ? 'Pago' : 'Pendente'}</Badge>

@@ -48,15 +48,25 @@ export interface Perfume {
   created_at?: string;
 }
 
+export interface Cliente {
+  id: number;
+  nome: string;
+  telefone: string | null;
+  created_at?: string;
+}
+
 export interface Venda {
   id: number;
   perf_id: number;
   qty: number;
   tipo: VendaTipo;
   cliente: string | null;
+  cliente_id: number | null;
   data: string;
   status: VendaStatus;
   venc: string | null;
+  parcela_num: number | null;
+  parcela_total: number | null;
   receita_valor: number;
   custo_valor: number;
   lucro_valor: number;

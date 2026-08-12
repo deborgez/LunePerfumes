@@ -46,7 +46,8 @@ export default function BaixaModal({ open, onClose, venda, perfumes }: BaixaModa
       }
     >
       <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-        Confirmar recebimento de {fmt(venda.receita_valor)} de {venda.cliente || '—'} referente a {p ? p.nome : ''} × {venda.qty}?
+        Confirmar recebimento de {fmt(venda.receita_valor)} de {venda.cliente || '—'} referente a {p ? p.nome : ''} × {venda.qty}
+        {venda.parcela_num && venda.parcela_total ? ` (parcela ${venda.parcela_num}/${venda.parcela_total})` : ''}?
       </p>
     </Modal>
   );

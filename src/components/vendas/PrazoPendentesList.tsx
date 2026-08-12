@@ -25,7 +25,9 @@ export default function PrazoPendentesList({
             <div className="flex-1">
               <div className="text-[13px] font-medium text-[var(--text)]">{v.cliente || '—'}</div>
               <div className="mt-0.5 text-[11px] text-[var(--text-hint)]">
-                {p ? p.nome : ''}&nbsp;×{v.qty}&nbsp;·&nbsp;Vence {fd(v.venc)}
+                {p ? p.nome : ''}&nbsp;×{v.qty}
+                {v.parcela_num && v.parcela_total ? ` · Parcela ${v.parcela_num}/${v.parcela_total}` : ''}
+                &nbsp;·&nbsp;Vence {fd(v.venc)}
               </div>
             </div>
             <Badge color="amber">{fmt(v.receita_valor)}</Badge>

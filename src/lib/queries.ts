@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from './types';
+import type { Cliente, Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from './types';
 
 export async function getEssencias(): Promise<Essencia[]> {
   const { data, error } = await supabase.from('essencias').select('*').order('created_at', { ascending: true });
@@ -18,6 +18,11 @@ export async function getPerfumes(): Promise<Perfume[]> {
 }
 export async function getVendas(): Promise<Venda[]> {
   const { data, error } = await supabase.from('vendas').select('*').order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+export async function getClientes(): Promise<Cliente[]> {
+  const { data, error } = await supabase.from('clientes').select('*').order('nome', { ascending: true });
   if (error) throw error;
   return data || [];
 }
@@ -78,24 +83,44 @@ export async function deletePerfume(id: number): Promise<void> {
   if (error) throw error;
 }
 
-export async function createVenda(body: {
+export interface VendaInsert {
   perf_id: number;
   qty: number;
   tipo: string;
   cliente: string;
+  cliente_id: number | null;
   data: string;
   status: string;
   venc: string | null;
+  parcela_num: number | null;
+  parcela_total: number | null;
   receita_valor: number;
   custo_valor: number;
   lucro_valor: number;
-}): Promise<Venda> {
-  const { data, error } = await supabase.from('vendas').insert(body).select();
+}
+
+export async function createVendas(bodies: VendaInsert[]): Promise<Venda[]> {
+  const { data, error } = await supabase.from('vendas').insert(bodies).select();
   if (error) throw error;
-  return data![0];
+  return data || [];
 }
 export async function updateVendaStatus(id: number, status: VendaStatus): Promise<void> {
   const { error } = await supabase.from('vendas').update({ status }).eq('id', id);
+  if (error) throw error;
+}
+
+export async function createCliente(body: Omit<Cliente, 'id' | 'created_at'>): Promise<Cliente> {
+  const { data, error } = await supabase.from('clientes').insert(body).select();
+  if (error) throw error;
+  return data![0];
+}
+export async function updateCliente(id: number, body: Partial<Cliente>): Promise<Cliente> {
+  const { data, error } = await supabase.from('clientes').update(body).eq('id', id).select();
+  if (error) throw error;
+  return data![0];
+}
+export async function deleteCliente(id: number): Promise<void> {
+  const { error } = await supabase.from('clientes').delete().eq('id', id);
   if (error) throw error;
 }
 
