@@ -112,20 +112,23 @@ export default function VendaForm() {
         </FormGroup>
       </div>
 
+      <div className="mb-2.5">
+        <FormGroup label={tipo === 'prazo' ? 'Cliente' : 'Cliente (opcional)'}>
+          <Select value={clienteId} onChange={(e) => setClienteId(e.target.value ? parseInt(e.target.value) : '')}>
+            <option value="">{clientes.length ? 'Selecione...' : '— Cadastre clientes primeiro —'}</option>
+            {clientes.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nome}
+              </option>
+            ))}
+          </Select>
+        </FormGroup>
+      </div>
+
       {tipo === 'prazo' && (
         <div>
           <div className="my-3.5 h-px bg-[var(--border)]" />
           <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
-            <FormGroup label="Cliente">
-              <Select value={clienteId} onChange={(e) => setClienteId(e.target.value ? parseInt(e.target.value) : '')}>
-                <option value="">{clientes.length ? 'Selecione...' : '— Cadastre clientes primeiro —'}</option>
-                {clientes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nome}
-                  </option>
-                ))}
-              </Select>
-            </FormGroup>
             <FormGroup label={parcelado ? '1ª parcela vence em' : 'Vencimento'}>
               <Input type="date" value={venc} onChange={(e) => setVenc(e.target.value)} />
             </FormGroup>

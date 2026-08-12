@@ -42,6 +42,10 @@ create table if not exists clientes (
   id bigint generated always as identity primary key,
   nome text not null,
   telefone text,
+  cpf text,
+  email text,
+  instagram text,
+  endereco text,
   created_at timestamptz not null default now()
 );
 

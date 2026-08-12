@@ -52,6 +52,10 @@ export interface Cliente {
   id: number;
   nome: string;
   telefone: string | null;
+  cpf: string | null;
+  email: string | null;
+  instagram: string | null;
+  endereco: string | null;
   created_at?: string;
 }
 

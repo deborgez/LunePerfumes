@@ -117,6 +117,80 @@ export function MaskedDecimalInput({ value, onChange, placeholder, className = '
   );
 }
 
+/** Formata dígitos de telefone BR: (XX) XXXX-XXXX (fixo) ou (XX) XXXXX-XXXX (celular). */
+export function formatPhoneBR(digits: string | null | undefined): string {
+  const d = (digits || '').replace(/\D/g, '').slice(0, 11);
+  if (!d) return '';
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+interface MaskedPhoneInputProps {
+  value: string;
+  onChange: (digits: string) => void;
+  placeholder?: string;
+  className?: string;
+  id?: string;
+}
+
+/** Input de telefone BR: aceita só dígitos e formata como (XX) XXXXX-XXXX enquanto digita. */
+export function MaskedPhoneInput({ value, onChange, placeholder, className = '', id }: MaskedPhoneInputProps) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    onChange(e.target.value.replace(/\D/g, '').slice(0, 11));
+  }
+
+  return (
+    <input
+      id={id}
+      type="text"
+      inputMode="tel"
+      value={formatPhoneBR(value)}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={`rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--text-hint)] focus:border-[var(--brand)] focus:shadow-[0_0_0_3px_rgba(127,119,221,0.15)] max-md:px-3.5 max-md:py-3 max-md:text-base ${className}`}
+    />
+  );
+}
+
+/** Formata dígitos de CPF: XXX.XXX.XXX-XX. */
+export function formatCPF(digits: string | null | undefined): string {
+  const d = (digits || '').replace(/\D/g, '').slice(0, 11);
+  if (!d) return '';
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+
+interface MaskedCPFInputProps {
+  value: string;
+  onChange: (digits: string) => void;
+  placeholder?: string;
+  className?: string;
+  id?: string;
+}
+
+/** Input de CPF: aceita só dígitos e formata como XXX.XXX.XXX-XX enquanto digita. */
+export function MaskedCPFInput({ value, onChange, placeholder, className = '', id }: MaskedCPFInputProps) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
+    onChange(e.target.value.replace(/\D/g, '').slice(0, 11));
+  }
+
+  return (
+    <input
+      id={id}
+      type="text"
+      inputMode="numeric"
+      value={formatCPF(value)}
+      onChange={handleChange}
+      placeholder={placeholder}
+      className={`rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--text-hint)] focus:border-[var(--brand)] focus:shadow-[0_0_0_3px_rgba(127,119,221,0.15)] max-md:px-3.5 max-md:py-3 max-md:text-base ${className}`}
+    />
+  );
+}
+
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
   const { className = '', children, ...rest } = props;
   return (
