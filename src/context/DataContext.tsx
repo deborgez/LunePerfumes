@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
 import { useToast } from './ToastContext';
 import * as q from '@/lib/queries';
-import { tod } from '@/lib/format';
+import { fmt, tod } from '@/lib/format';
 import type { Cliente, Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
 
 type SyncStatus = 'spin' | 'ok' | 'err';
@@ -51,7 +51,7 @@ interface DataContextValue {
     parcelado: boolean;
     parcelas: number;
   }) => Promise<boolean>;
-  baixarVenda: (id: number) => Promise<void>;
+  baixarVenda: (id: number, valorRecebido: number) => Promise<boolean>;
 }
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -324,14 +324,51 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function baixarVenda(id: number) {
+  async function baixarVenda(id: number, valorRecebido: number) {
+    const venda = vendas.find((v) => v.id === id);
+    if (!venda) return false;
+    const total = venda.receita_valor;
+    const recebidoCents = Math.round(Math.min(Math.max(valorRecebido, 0), total) * 100);
+    const remanescenteCents = Math.round(total * 100) - recebidoCents;
+
     try {
-      const status: VendaStatus = 'pago';
-      await q.updateVendaStatus(id, status);
-      setVendas((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
-      toast('Recebido! Caixa atualizado.', 'ok');
-    } catch {
-      toast('Erro', 'err');
+      if (remanescenteCents <= 0) {
+        const status: VendaStatus = 'pago';
+        await q.updateVendaStatus(id, status);
+        setVendas((prev) => prev.map((v) => (v.id === id ? { ...v, status } : v)));
+        toast('Recebido! Caixa atualizado.', 'ok');
+        return true;
+      }
+
+      const remanescente = remanescenteCents / 100;
+      const recebido = recebidoCents / 100;
+      const [updatedPendente, [novoPago]] = await Promise.all([
+        q.updateVenda(id, { receita_valor: remanescente, lucro_valor: remanescente }),
+        q.createVendas([
+          {
+            perf_id: venda.perf_id,
+            qty: venda.qty,
+            tipo: venda.tipo,
+            cliente: venda.cliente || '',
+            cliente_id: venda.cliente_id,
+            data: tod(),
+            status: 'pago',
+            venc: venda.venc,
+            parcela_num: venda.parcela_num,
+            parcela_total: venda.parcela_total,
+            receita_valor: recebido,
+            custo_valor: 0,
+            lucro_valor: recebido,
+          },
+        ]),
+      ]);
+
+      setVendas((prev) => [novoPago, ...prev.map((v) => (v.id === id ? updatedPendente : v))]);
+      toast(`Recebido ${fmt(recebido)}! Restam ${fmt(remanescente)} em aberto.`, 'ok');
+      return true;
+    } catch (e) {
+      toast('Erro: ' + (e as Error).message, 'err');
+      return false;
     }
   }
 

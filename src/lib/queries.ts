@@ -108,6 +108,11 @@ export async function updateVendaStatus(id: number, status: VendaStatus): Promis
   const { error } = await supabase.from('vendas').update({ status }).eq('id', id);
   if (error) throw error;
 }
+export async function updateVenda(id: number, body: Partial<Venda>): Promise<Venda> {
+  const { data, error } = await supabase.from('vendas').update(body).eq('id', id).select();
+  if (error) throw error;
+  return data![0];
+}
 
 export async function createCliente(body: Omit<Cliente, 'id' | 'created_at'>): Promise<Cliente> {
   const { data, error } = await supabase.from('clientes').insert(body).select();
