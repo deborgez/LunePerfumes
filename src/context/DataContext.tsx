@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState, ReactNode 
 import { useToast } from './ToastContext';
 import * as q from '@/lib/queries';
 import { fmt, tod } from '@/lib/format';
-import type { Cliente, Essencia, Genero, Insumo, Lancamento, LancamentoTipo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
+import type { Cliente, Essencia, Genero, Insumo, Lancamento, LancamentoTipo, Perfume, ReceitaItem, Venda, VendaStatus, Vendedor } from '@/lib/types';
 
 type SyncStatus = 'spin' | 'ok' | 'err';
 
@@ -14,6 +14,7 @@ interface DataContextValue {
   perfumes: Perfume[];
   vendas: Venda[];
   clientes: Cliente[];
+  vendedores: Vendedor[];
   lancamentos: Lancamento[];
   syncStatus: SyncStatus;
   syncMsg: string;
@@ -42,6 +43,9 @@ interface DataContextValue {
   saveCliente: (id: number | null, body: Omit<Cliente, 'id' | 'created_at'>) => Promise<boolean>;
   deleteCliente: (id: number) => Promise<void>;
 
+  saveVendedor: (id: number | null, body: Omit<Vendedor, 'id' | 'created_at'>) => Promise<boolean>;
+  deleteVendedor: (id: number) => Promise<void>;
+
   saveLancamento: (body: { tipo: LancamentoTipo; descricao: string; valor: number; data: string }) => Promise<boolean>;
   deleteLancamento: (id: number) => Promise<void>;
 
@@ -53,9 +57,12 @@ interface DataContextValue {
     tipo: 'avista' | 'prazo';
     cliente: string;
     clienteId: number | null;
+    vendedor?: string;
+    vendedorId?: number | null;
     venc: string;
     parcelado: boolean;
     parcelas: number;
+    precoUnit?: number;
   }) => Promise<boolean>;
   baixarVenda: (id: number, valorRecebido: number) => Promise<boolean>;
 }
@@ -69,6 +76,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
   const [vendas, setVendas] = useState<Venda[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [vendedores, setVendedores] = useState<Vendedor[]>([]);
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([]);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('spin');
   const [syncMsg, setSyncMsg] = useState('Conectando...');
@@ -78,12 +86,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setSyncStatus('spin');
     setSyncMsg('Sincronizando...');
     try {
-      const [ess, ins, perf, vend, cli, lanc] = await Promise.all([
+      const [ess, ins, perf, vend, cli, vdr, lanc] = await Promise.all([
         q.getEssencias(),
         q.getInsumos(),
         q.getPerfumes(),
         q.getVendas(),
         q.getClientes(),
+        q.getVendedores(),
         q.getLancamentos(),
       ]);
       setEssencias(ess);
@@ -91,6 +100,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setPerfumes(perf);
       setVendas(vend);
       setClientes(cli);
+      setVendedores(vdr);
       setLancamentos(lanc);
       setSyncStatus('ok');
       setSyncMsg('Sincronizado');
@@ -242,6 +252,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function saveVendedor(id: number | null, body: Omit<Vendedor, 'id' | 'created_at'>) {
+    try {
+      if (id) {
+        const r = await q.updateVendedor(id, body);
+        setVendedores((prev) => prev.map((x) => (x.id === id ? r : x)));
+        toast('Vendedor atualizado!', 'ok');
+      } else {
+        const r = await q.createVendedor(body);
+        setVendedores((prev) => [...prev, r]);
+        toast('Vendedor cadastrado!', 'ok');
+      }
+      return true;
+    } catch (e) {
+      toast('Erro: ' + (e as Error).message, 'err');
+      return false;
+    }
+  }
+
+  async function deleteVendedorFn(id: number) {
+    try {
+      await q.deleteVendedor(id);
+      setVendedores((prev) => prev.filter((x) => x.id !== id));
+      toast('Removido');
+    } catch {
+      toast('Erro', 'err');
+    }
+  }
+
   async function saveLancamento(body: { tipo: LancamentoTipo; descricao: string; valor: number; data: string }) {
     try {
       const r = await q.createLancamento(body);
@@ -303,16 +341,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
     tipo: 'avista' | 'prazo';
     cliente: string;
     clienteId: number | null;
+    vendedor?: string;
+    vendedorId?: number | null;
     venc: string;
     parcelado: boolean;
     parcelas: number;
+    precoUnit?: number;
   }) {
-    const { perfId, qty, tipo, cliente, clienteId, venc, parcelado, parcelas } = params;
+    const { perfId, qty, tipo, cliente, clienteId, vendedor, vendedorId, venc, parcelado, parcelas, precoUnit } = params;
     const p = perfumes.find((x) => x.id === perfId);
     if (!p) return false;
     // O custo da receita não é mais deduzido automaticamente na venda — o valor
     // contabilizado é a receita bruta. Custos entram separadamente no Caixa.
-    const rv = p.preco * qty;
+    const rv = (precoUnit ?? p.preco) * qty;
     const numParcelas = tipo === 'prazo' && parcelado && parcelas > 1 ? parcelas : 1;
 
     try {
@@ -332,6 +373,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
             tipo,
             cliente: cliente || '',
             cliente_id: clienteId,
+            vendedor: vendedor || null,
+            vendedor_id: vendedorId ?? null,
             data: tod(),
             status: 'pendente',
             venc: d.toISOString().split('T')[0],
@@ -350,6 +393,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
             tipo,
             cliente: cliente || '',
             cliente_id: clienteId,
+            vendedor: vendedor || null,
+            vendedor_id: vendedorId ?? null,
             data: tod(),
             status: tipo === 'avista' ? 'pago' : 'pendente',
             venc: venc || null,
@@ -415,6 +460,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
             tipo: venda.tipo,
             cliente: venda.cliente || '',
             cliente_id: venda.cliente_id,
+            vendedor: venda.vendedor || null,
+            vendedor_id: venda.vendedor_id,
             data: tod(),
             status: 'pago',
             venc: venda.venc,
@@ -444,6 +491,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         perfumes,
         vendas,
         clientes,
+        vendedores,
         lancamentos,
         syncStatus,
         syncMsg,
@@ -458,6 +506,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         deletePerfume: deletePerfumeFn,
         saveCliente,
         deleteCliente: deleteClienteFn,
+        saveVendedor,
+        deleteVendedor: deleteVendedorFn,
         saveLancamento,
         deleteLancamento: deleteLancamentoFn,
         deleteVendaCompra,

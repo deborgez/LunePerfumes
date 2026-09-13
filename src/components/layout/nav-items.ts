@@ -4,6 +4,7 @@ import {
   IconBox,
   IconDroplet,
   IconUsers,
+  IconUserStar,
   IconShoppingCart,
   IconCash,
 } from '@tabler/icons-react';
@@ -14,6 +15,7 @@ export const NAV_ITEMS = [
   { href: '/insumos', label: 'Insumos', mobileLabel: 'Insumos', icon: IconBox },
   { href: '/perfumes', label: 'Perfumes', mobileLabel: 'Perfumes', icon: IconDroplet },
   { href: '/clientes', label: 'Clientes', mobileLabel: 'Clientes', icon: IconUsers },
+  { href: '/vendedores', label: 'Vendedores', mobileLabel: 'Vendedores', icon: IconUserStar },
   { href: '/vendas', label: 'Vendas', mobileLabel: 'Vendas', icon: IconShoppingCart },
   { href: '/caixa', label: 'Caixa', mobileLabel: 'Caixa', icon: IconCash },
 ] as const;
@@ -24,6 +26,7 @@ export const PAGE_TITLES: Record<string, string> = {
   '/insumos': 'Insumos',
   '/perfumes': 'Perfumes',
   '/clientes': 'Clientes',
+  '/vendedores': 'Vendedores',
   '/vendas': 'Vendas',
   '/caixa': 'Caixa',
 };

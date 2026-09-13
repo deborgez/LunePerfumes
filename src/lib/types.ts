@@ -60,6 +60,13 @@ export interface Cliente {
   created_at?: string;
 }
 
+export interface Vendedor {
+  id: number;
+  nome: string;
+  telefone: string | null;
+  created_at?: string;
+}
+
 export interface Venda {
   id: number;
   perf_id: number;
@@ -67,6 +74,8 @@ export interface Venda {
   tipo: VendaTipo;
   cliente: string | null;
   cliente_id: number | null;
+  vendedor: string | null;
+  vendedor_id: number | null;
   data: string;
   status: VendaStatus;
   venc: string | null;

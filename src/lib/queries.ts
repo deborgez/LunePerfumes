@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Cliente, Essencia, Genero, Insumo, Lancamento, Perfume, ReceitaItem, Venda, VendaStatus } from './types';
+import type { Cliente, Essencia, Genero, Insumo, Lancamento, Perfume, ReceitaItem, Venda, VendaStatus, Vendedor } from './types';
 
 export async function getEssencias(): Promise<Essencia[]> {
   const { data, error } = await supabase.from('essencias').select('*').order('created_at', { ascending: true });
@@ -23,6 +23,11 @@ export async function getVendas(): Promise<Venda[]> {
 }
 export async function getClientes(): Promise<Cliente[]> {
   const { data, error } = await supabase.from('clientes').select('*').order('nome', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+export async function getVendedores(): Promise<Vendedor[]> {
+  const { data, error } = await supabase.from('vendedores').select('*').order('nome', { ascending: true });
   if (error) throw error;
   return data || [];
 }
@@ -95,6 +100,8 @@ export interface VendaInsert {
   tipo: string;
   cliente: string;
   cliente_id: number | null;
+  vendedor: string | null;
+  vendedor_id: number | null;
   data: string;
   status: string;
   venc: string | null;
@@ -136,6 +143,21 @@ export async function updateCliente(id: number, body: Partial<Cliente>): Promise
 }
 export async function deleteCliente(id: number): Promise<void> {
   const { error } = await supabase.from('clientes').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function createVendedor(body: Omit<Vendedor, 'id' | 'created_at'>): Promise<Vendedor> {
+  const { data, error } = await supabase.from('vendedores').insert(body).select();
+  if (error) throw error;
+  return data![0];
+}
+export async function updateVendedor(id: number, body: Partial<Vendedor>): Promise<Vendedor> {
+  const { data, error } = await supabase.from('vendedores').update(body).eq('id', id).select();
+  if (error) throw error;
+  return data![0];
+}
+export async function deleteVendedor(id: number): Promise<void> {
+  const { error } = await supabase.from('vendedores').delete().eq('id', id);
   if (error) throw error;
 }
 

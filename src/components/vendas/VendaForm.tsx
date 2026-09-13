@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IconCheck, IconShoppingCart } from '@tabler/icons-react';
-import { Btn, Card, CardHeader, FormGroup, Input, Select } from '@/components/shared/ui';
+import { Btn, Card, CardHeader, FormGroup, Input, MaskedDecimalInput, Select } from '@/components/shared/ui';
 import SearchSelect from '@/components/shared/SearchSelect';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
@@ -10,13 +10,15 @@ import { gi, receitaOf } from '@/lib/business';
 import { fmt } from '@/lib/format';
 
 export default function VendaForm() {
-  const { perfumes, essencias, insumos, clientes, vender } = useData();
+  const { perfumes, essencias, insumos, clientes, vendedores, vender } = useData();
   const toast = useToast();
 
   const [perfId, setPerfId] = useState<number | ''>(perfumes[0]?.id ?? '');
+  const [preco, setPreco] = useState(0);
   const [qty, setQty] = useState('1');
   const [tipo, setTipo] = useState<'avista' | 'prazo'>('avista');
   const [clienteId, setClienteId] = useState<number | ''>('');
+  const [vendedorId, setVendedorId] = useState<number | ''>('');
   const [venc, setVenc] = useState('');
   const [parcelado, setParcelado] = useState(false);
   const [parcelas, setParcelas] = useState('2');
@@ -26,6 +28,11 @@ export default function VendaForm() {
   const p = perfumes.find((x) => x.id === currentPerfId);
   const qtyN = parseInt(qty) || 1;
   const parcelasN = Math.max(2, parseInt(parcelas) || 2);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset price field to the perfume's default when selection changes
+    if (p) setPreco(p.preco);
+  }, [p]);
 
   let resumo: { itens: { nome: string; qtd: string }[]; receita: number; custo: number; lucro: number; margem: number } | null = null;
   if (p) {
@@ -41,7 +48,7 @@ export default function VendaForm() {
       })
       .filter((x): x is { nome: string; qtd: string } => x !== null);
     custo *= qtyN;
-    const receita = p.preco * qtyN;
+    const receita = preco * qtyN;
     const lucro = receita - custo;
     const margem = receita > 0 ? Math.round((lucro / receita) * 100) : 0;
     resumo = { itens, receita, custo, lucro, margem };
@@ -61,6 +68,7 @@ export default function VendaForm() {
       return;
     }
     const cli = clientes.find((c) => c.id === clienteId);
+    const vdr = vendedores.find((v) => v.id === vendedorId);
     setSaving(true);
     const ok = await vender({
       perfId: currentPerfId,
@@ -68,14 +76,18 @@ export default function VendaForm() {
       tipo,
       cliente: cli?.nome || '',
       clienteId: clienteId || null,
+      vendedor: vdr?.nome || '',
+      vendedorId: vendedorId || null,
       venc,
       parcelado,
       parcelas: parcelasN,
+      precoUnit: preco,
     });
     setSaving(false);
     if (ok) {
       setQty('1');
       setClienteId('');
+      setVendedorId('');
       setVenc('');
       setParcelado(false);
       setParcelas('2');
@@ -102,9 +114,12 @@ export default function VendaForm() {
           )}
         </FormGroup>
       </div>
-      <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
+      <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-3">
         <FormGroup label="Quantidade">
           <Input type="number" min={1} inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} />
+        </FormGroup>
+        <FormGroup label="Valor unitário">
+          <MaskedDecimalInput value={preco} onChange={setPreco} placeholder="0,00" />
         </FormGroup>
         <FormGroup label="Modalidade">
           <Select value={tipo} onChange={(e) => setTipo(e.target.value as 'avista' | 'prazo')}>
@@ -127,6 +142,25 @@ export default function VendaForm() {
               onChange={setClienteId}
               placeholder="Buscar cliente..."
               emptyMessage="Nenhum cliente encontrado"
+              allowClear
+            />
+          )}
+        </FormGroup>
+      </div>
+
+      <div className="mb-2.5">
+        <FormGroup label="Vendedor (opcional)">
+          {!vendedores.length ? (
+            <Select disabled value="">
+              <option value="">— Nenhum vendedor cadastrado —</option>
+            </Select>
+          ) : (
+            <SearchSelect
+              options={vendedores.map((v) => ({ value: v.id, label: v.nome }))}
+              value={vendedorId}
+              onChange={setVendedorId}
+              placeholder="Buscar vendedor..."
+              emptyMessage="Nenhum vendedor encontrado"
               allowClear
             />
           )}
