@@ -1,12 +1,17 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import BottomNav from './BottomNav';
 import LoadingCover from './LoadingCover';
 
 export default function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  // Páginas públicas (voltadas pro cliente final) não usam o menu interno de gestão.
+  if (pathname?.startsWith('/catalogo')) return <>{children}</>;
+
   return (
     <>
       <LoadingCover />

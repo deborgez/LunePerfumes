@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Usada no wordmark do catálogo público (/catalogo) */
+@font-face {
+  font-family: 'Panton';
+  font-weight: 700;
+  font-style: normal;
+  src: url('/fonts/Panton-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
 /* Desktop breakpoint matches the original 680px mobile cutoff */
 @theme {
   --breakpoint-md: 681px;
