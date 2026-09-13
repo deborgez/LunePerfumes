@@ -1,9 +1,9 @@
 'use client';
 
 import { Btn, Badge } from '@/components/shared/ui';
-import { IconCash, IconTag } from '@tabler/icons-react';
+import { IconCash, IconTag, IconTrash } from '@tabler/icons-react';
 import { fd, fmt } from '@/lib/format';
-import { agruparPorClienteECompra } from '@/lib/vendasGrouping';
+import { agruparPorClienteECompra, type CompraGroup } from '@/lib/vendasGrouping';
 import { baixarEtiqueta } from '@/lib/etiqueta';
 import { useToast } from '@/context/ToastContext';
 import type { Perfume, Venda } from '@/lib/types';
@@ -13,11 +13,13 @@ export default function VendasList({
   perfumes,
   tipo,
   onReceber,
+  onExcluir,
 }: {
   vendas: Venda[];
   perfumes: Perfume[];
   tipo: 'avista' | 'prazo';
   onReceber?: (v: Venda) => void;
+  onExcluir?: (itens: Venda[]) => void;
 }) {
   const toast = useToast();
   const filtradas = vendas.filter((v) => v.tipo === tipo);
@@ -32,6 +34,12 @@ export default function VendasList({
     } catch {
       toast('Falha ao gerar a etiqueta', 'err');
     }
+  }
+
+  function handleExcluir(compra: CompraGroup) {
+    if (!onExcluir) return;
+    if (!confirm(`Excluir a venda de "${compra.perfumeNome}"? O estoque consumido será devolvido.`)) return;
+    onExcluir(compra.itens);
   }
 
   return (
@@ -53,9 +61,16 @@ export default function VendasList({
                       <span className="ml-1.5 text-[11px] font-normal text-[var(--text-hint)]">· {compra.parcelaTotal}x</span>
                     ) : null}
                   </div>
-                  <Btn size="xs" onClick={() => handleEtiqueta(c.clienteNome, compra.perfumeNome)}>
-                    <IconTag size={14} /> Etiqueta
-                  </Btn>
+                  <div className="flex gap-1.5">
+                    <Btn size="xs" onClick={() => handleEtiqueta(c.clienteNome, compra.perfumeNome)}>
+                      <IconTag size={14} /> Etiqueta
+                    </Btn>
+                    {onExcluir && (
+                      <Btn size="xs" variant="danger" onClick={() => handleExcluir(compra)}>
+                        <IconTrash size={14} />
+                      </Btn>
+                    )}
+                  </div>
                 </div>
                 {compra.itens.map((v) => (
                   <div key={v.id} className="flex items-center gap-2.5 py-1">

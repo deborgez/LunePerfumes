@@ -27,7 +27,7 @@ export default function VendaForm() {
   const qtyN = parseInt(qty) || 1;
   const parcelasN = Math.max(2, parseInt(parcelas) || 2);
 
-  let resumo: { itens: { nome: string; qtd: string }[]; receita: number; custo: number; lucro: number } | null = null;
+  let resumo: { itens: { nome: string; qtd: string }[]; receita: number; custo: number; lucro: number; margem: number } | null = null;
   if (p) {
     let custo = 0;
     const rec = receitaOf(p);
@@ -42,7 +42,9 @@ export default function VendaForm() {
       .filter((x): x is { nome: string; qtd: string } => x !== null);
     custo *= qtyN;
     const receita = p.preco * qtyN;
-    resumo = { itens, receita, custo, lucro: receita - custo };
+    const lucro = receita - custo;
+    const margem = receita > 0 ? Math.round((lucro / receita) * 100) : 0;
+    resumo = { itens, receita, custo, lucro, margem };
   }
 
   async function handleVender() {
@@ -170,7 +172,7 @@ export default function VendaForm() {
               </span>
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
             <div>
               <div className="mb-[3px] text-[11px] text-[var(--text-hint)]">Receita</div>
               <div className="text-base font-semibold" style={{ color: 'var(--green)' }}>
@@ -187,6 +189,12 @@ export default function VendaForm() {
               <div className="mb-[3px] text-[11px] text-[var(--text-hint)]">Lucro</div>
               <div className="text-base font-semibold" style={{ color: resumo.lucro >= 0 ? 'var(--brand)' : 'var(--red)' }}>
                 {fmt(resumo.lucro)}
+              </div>
+            </div>
+            <div>
+              <div className="mb-[3px] text-[11px] text-[var(--text-hint)]">Margem</div>
+              <div className="text-base font-semibold" style={{ color: resumo.margem >= 0 ? 'var(--brand)' : 'var(--red)' }}>
+                {resumo.margem}%
               </div>
             </div>
           </div>

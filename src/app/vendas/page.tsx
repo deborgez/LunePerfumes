@@ -11,7 +11,7 @@ import BaixaModal from '@/components/shared/BaixaModal';
 import type { Venda } from '@/lib/types';
 
 export default function VendasPage() {
-  const { vendas, perfumes } = useData();
+  const { vendas, perfumes, deleteVendaCompra } = useData();
   const [baixaOpen, setBaixaOpen] = useState(false);
   const [baixaVenda, setBaixaVenda] = useState<Venda | null>(null);
 
@@ -29,7 +29,7 @@ export default function VendasPage() {
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <Card>
           <CardHeader title="Vendas à vista" icon={<IconShoppingCart size={17} />} />
-          <VendasList vendas={vendas} perfumes={perfumes} tipo="avista" />
+          <VendasList vendas={vendas} perfumes={perfumes} tipo="avista" onExcluir={deleteVendaCompra} />
         </Card>
         <Card>
           <CardHeader
@@ -37,7 +37,7 @@ export default function VendasPage() {
             icon={<IconReceipt size={17} />}
             action={totalPendente > 0 ? <Badge color="amber">A receber: {fmt(totalPendente)}</Badge> : undefined}
           />
-          <VendasList vendas={vendas} perfumes={perfumes} tipo="prazo" onReceber={openBaixa} />
+          <VendasList vendas={vendas} perfumes={perfumes} tipo="prazo" onReceber={openBaixa} onExcluir={deleteVendaCompra} />
         </Card>
       </div>
 

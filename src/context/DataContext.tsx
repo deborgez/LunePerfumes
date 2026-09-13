@@ -45,6 +45,8 @@ interface DataContextValue {
   saveLancamento: (body: { tipo: LancamentoTipo; descricao: string; valor: number; data: string }) => Promise<boolean>;
   deleteLancamento: (id: number) => Promise<void>;
 
+  deleteVendaCompra: (itens: Venda[]) => Promise<void>;
+
   vender: (params: {
     perfId: number;
     qty: number;
@@ -262,6 +264,39 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function deleteVendaCompra(itens: Venda[]) {
+    if (!itens.length) return;
+    const ids = itens.map((v) => v.id);
+    const perfId = itens[0].perf_id;
+    const qty = itens[0].qty;
+    try {
+      await q.deleteVendas(ids);
+      setVendas((prev) => prev.filter((v) => !ids.includes(v.id)));
+
+      const p = perfumes.find((x) => x.id === perfId);
+      if (p) {
+        const rec = Array.isArray(p.receita) ? p.receita : JSON.parse((p.receita as unknown as string) || '[]');
+        for (const r of rec) {
+          const itemId = r.itemId ?? r.item_id;
+          const lista = r.tipo === 'essencia' ? essencias : insumos;
+          const it = lista.find((x) => x.id === itemId);
+          if (it) {
+            const ne = it.estoque + r.qtd * qty;
+            await q.patchEstoque(r.tipo === 'essencia' ? 'essencias' : 'insumos', it.id, ne);
+            if (r.tipo === 'essencia') {
+              setEssencias((prev) => prev.map((x) => (x.id === it.id ? { ...x, estoque: ne } : x)));
+            } else {
+              setInsumos((prev) => prev.map((x) => (x.id === it.id ? { ...x, estoque: ne } : x)));
+            }
+          }
+        }
+      }
+      toast('Venda excluída, estoque devolvido.', 'ok');
+    } catch (e) {
+      toast('Erro: ' + (e as Error).message, 'err');
+    }
+  }
+
   async function vender(params: {
     perfId: number;
     qty: number;
@@ -425,6 +460,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         deleteCliente: deleteClienteFn,
         saveLancamento,
         deleteLancamento: deleteLancamentoFn,
+        deleteVendaCompra,
         vender,
         baixarVenda,
       }}

@@ -119,6 +119,10 @@ export async function updateVenda(id: number, body: Partial<Venda>): Promise<Ven
   if (error) throw error;
   return data![0];
 }
+export async function deleteVendas(ids: number[]): Promise<void> {
+  const { error } = await supabase.from('vendas').delete().in('id', ids);
+  if (error) throw error;
+}
 
 export async function createCliente(body: Omit<Cliente, 'id' | 'created_at'>): Promise<Cliente> {
   const { data, error } = await supabase.from('clientes').insert(body).select();
