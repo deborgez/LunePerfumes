@@ -1,27 +1,44 @@
 // Gera a etiqueta de um frasco (14mm x 40mm) como PNG, renderizada em canvas.
-// Fonte de referência do modelo é Panton (Light Italic / Bold); como o Panton
-// não é uma fonte gratuita disponível via Google Fonts, usamos Poppins como
-// substituta visualmente equivalente (geométrica, mesma família de estilo).
+// Usa a fonte real Panton (arquivos em /public/fonts), carregada sob demanda.
 const DPI = 300;
 const MM_TO_PX = (mm: number) => Math.round((mm / 25.4) * DPI);
 
 const LARGURA_MM = 40;
 const ALTURA_MM = 14;
 
-const FONTE = 'Poppins';
+// Tamanho de fonte de referência do Photoshop (4,24 pt) convertido para px
+// na mesma resolução (300dpi) usada para gerar o canvas em alta definição.
+const TAMANHO_FONTE_PT = 4.24;
+const TAMANHO_FONTE_PX = (TAMANHO_FONTE_PT / 72) * DPI;
+
+const FONTE = 'Panton';
 const FONTE_FALLBACK = `"${FONTE}", "Helvetica Neue", Arial, sans-serif`;
 
-async function garantirFonteCarregada(): Promise<void> {
-  try {
-    await Promise.all([
-      document.fonts.load(`italic 300 16px "${FONTE}"`),
-      document.fonts.load(`700 16px "${FONTE}"`),
-      document.fonts.load(`600 16px "${FONTE}"`),
-    ]);
-    await document.fonts.ready;
-  } catch {
-    // segue com a fonte de fallback caso a web font não carregue
+let fontesCarregadas: Promise<void> | null = null;
+
+function garantirFonteCarregada(): Promise<void> {
+  if (!fontesCarregadas) {
+    fontesCarregadas = (async () => {
+      try {
+        const [light, bold] = await Promise.all([
+          new FontFace(FONTE, 'url(/fonts/Panton-LightItalic.ttf)', { style: 'italic', weight: '300' }).load(),
+          new FontFace(FONTE, 'url(/fonts/Panton-Bold.ttf)', { style: 'normal', weight: '700' }).load(),
+        ]);
+        document.fonts.add(light);
+        document.fonts.add(bold);
+      } catch {
+        // segue com a fonte de fallback caso o arquivo não carregue
+      }
+    })();
   }
+  return fontesCarregadas;
+}
+
+// A fonte Panton (versão trial) não tem os glifos acentuados do português —
+// letras como "â"/"ç"/"ã" saem como caractere quebrado. Removemos os acentos
+// do texto renderizado para evitar isso.
+function semAcentos(texto: string): string {
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
 function ajustarFonte(ctx: CanvasRenderingContext2D, texto: string, larguraMax: number, fontePadrao: number, prefixo: string): number {
@@ -55,16 +72,16 @@ export async function gerarEtiquetaPng(clienteNome: string, perfumeNome: string)
   const larguraTexto = w - padEsq - padDir - larguraLogo;
 
   const linha1 = 'Produzido e envazado especialmente para';
-  const linha2 = clienteNome.trim() || 'Cliente';
-  const linha3 = 'Fragrância inspirada em';
-  const linha4 = perfumeNome.trim().toUpperCase();
+  const linha2 = semAcentos(clienteNome.trim() || 'Cliente');
+  const linha3 = semAcentos('Fragrância inspirada em');
+  const linha4 = semAcentos(perfumeNome.trim().toUpperCase());
 
   ctx.textAlign = 'left';
 
-  const f1 = ajustarFonte(ctx, linha1, larguraTexto, Math.round(h * 0.115), 'italic 300');
-  const f2 = ajustarFonte(ctx, linha2, larguraTexto, Math.round(h * 0.15), '700');
-  const f3 = ajustarFonte(ctx, linha3, larguraTexto, Math.round(h * 0.115), 'italic 300');
-  const f4 = ajustarFonte(ctx, linha4, larguraTexto, Math.round(h * 0.15), '700');
+  const f1 = ajustarFonte(ctx, linha1, larguraTexto, TAMANHO_FONTE_PX, 'italic 300');
+  const f2 = ajustarFonte(ctx, linha2, larguraTexto, TAMANHO_FONTE_PX, '700');
+  const f3 = ajustarFonte(ctx, linha3, larguraTexto, TAMANHO_FONTE_PX, 'italic 300');
+  const f4 = ajustarFonte(ctx, linha4, larguraTexto, TAMANHO_FONTE_PX, '700');
 
   const y1 = h * 0.22;
   const y2 = h * 0.36;
@@ -87,7 +104,7 @@ export async function gerarEtiquetaPng(clienteNome: string, perfumeNome: string)
   ctx.textAlign = 'right';
   const xLogo = w - padDir;
   const fLogo = Math.round(h * 0.32);
-  ctx.font = `600 ${fLogo}px ${FONTE_FALLBACK}`;
+  ctx.font = `700 ${fLogo}px ${FONTE_FALLBACK}`;
   ctx.fillText('LU', xLogo, h * 0.36);
   ctx.fillText('NE', xLogo, h * 0.68);
 
