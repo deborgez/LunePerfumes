@@ -9,7 +9,7 @@ const variantClasses: Record<Variant, string> = {
   default: 'bg-[var(--surface)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--surface2)]',
   primary: 'bg-[var(--brand)] text-white border-[var(--brand)] hover:bg-[var(--brand-dark)]',
   success: 'bg-[var(--green)] text-white border-[var(--green)] hover:bg-[var(--green-dark)]',
-  danger: 'bg-[var(--red-light)] text-[var(--red-dark)] border-transparent',
+  danger: 'bg-[var(--red-light)] text-[var(--red-dark)] border-transparent hover:bg-[var(--red)] hover:text-white',
 };
 
 const sizeClasses: Record<Size, string> = {
