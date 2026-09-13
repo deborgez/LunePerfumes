@@ -46,7 +46,7 @@ export default function PerfumesPage() {
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr>
-                {['Nome', 'Marca', 'Gênero', 'Volume', 'Preço', 'Custo', 'Margem', 'Lucro', 'Ações'].map((h) => (
+                {['Nome', 'Marca', 'Fornecedor', 'Gênero', 'Volume', 'Preço', 'Custo', 'Margem', 'Lucro', 'Ações'].map((h) => (
                   <th
                     key={h}
                     className="whitespace-nowrap border-b border-[var(--border)] bg-[var(--tbl-head)] px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[var(--text-hint)]"
@@ -59,7 +59,7 @@ export default function PerfumesPage() {
             <tbody>
               {!perfumes.length ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-[13px] text-[var(--text-hint)]">
+                  <td colSpan={10} className="p-8 text-center text-[13px] text-[var(--text-hint)]">
                     <IconDroplet size={24} className="mx-auto mb-1.5" />
                     Nenhum perfume
                   </td>
@@ -76,6 +76,7 @@ export default function PerfumesPage() {
                         {p.inspiracao && <div className="mt-0.5 text-[11px] text-[var(--text-hint)]">Insp.: {p.inspiracao}</div>}
                       </td>
                       <td className="px-3 py-2.5 text-[var(--text)]">{p.marca}</td>
+                      <td className="px-3 py-2.5 text-[var(--text)]">{p.fornecedor || '—'}</td>
                       <td className="px-3 py-2.5">
                         <Badge color={GENERO_COLOR[p.genero]}>{GENERO_LABEL[p.genero]}</Badge>
                       </td>
@@ -123,7 +124,7 @@ export default function PerfumesPage() {
                     <div>
                       <div className="text-sm font-semibold text-[var(--text)]">{p.nome}</div>
                       <div className="mt-[3px] text-xs text-[var(--text-muted)]">
-                        {p.marca} · {p.ml} ml
+                        {p.marca} · {p.ml} ml{p.fornecedor ? ` · ${p.fornecedor}` : ''}
                       </div>
                       {p.inspiracao && <div className="mt-0.5 text-xs text-[var(--text-hint)]">Insp.: {p.inspiracao}</div>}
                     </div>

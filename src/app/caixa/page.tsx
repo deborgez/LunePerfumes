@@ -1,16 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { IconHistory, IconCash, IconMinus, IconTrendingUp } from '@tabler/icons-react';
+import { IconHistory, IconCash, IconMinus, IconTrendingUp, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
-import { StatCard, Card, CardHeader, Badge, Select } from '@/components/shared/ui';
+import { StatCard, Card, CardHeader, Badge, Select, Btn } from '@/components/shared/ui';
+import LancamentoModal from '@/components/caixa/LancamentoModal';
 import { fd, fmt } from '@/lib/format';
 
 type Filtro = 'todos' | 'avista' | 'prazo' | 'pago' | 'pendente';
 
 export default function CaixaPage() {
-  const { vendas, perfumes } = useData();
+  const { vendas, perfumes, lancamentos, deleteLancamento } = useData();
   const [filtro, setFiltro] = useState<Filtro>('todos');
+  const [lancamentoModalOpen, setLancamentoModalOpen] = useState(false);
 
   let cx = 0,
     lu = 0,
@@ -23,6 +25,20 @@ export default function CaixaPage() {
       cu += v.custo_valor || 0;
     });
 
+  let entradas = 0,
+    despesas = 0;
+  lancamentos.forEach((l) => {
+    if (l.tipo === 'entrada') entradas += l.valor || 0;
+    else despesas += l.valor || 0;
+  });
+  cx += entradas - despesas;
+  lu += entradas - despesas;
+
+  async function handleDeleteLancamento(id: number) {
+    if (!confirm('Excluir este lançamento?')) return;
+    await deleteLancamento(id);
+  }
+
   const lista = vendas.filter((v) => {
     if (filtro === 'avista') return v.tipo === 'avista';
     if (filtro === 'prazo') return v.tipo === 'prazo';
@@ -34,10 +50,61 @@ export default function CaixaPage() {
   return (
     <div>
       <div className="mb-3.5 grid grid-cols-2 gap-3 md:grid-cols-3">
-        <StatCard label="Total em caixa" value={fmt(cx)} icon={<IconCash size={14} />} sub="vendas pagas" color="green" />
+        <StatCard label="Total em caixa" value={fmt(cx)} icon={<IconCash size={14} />} sub="vendas pagas + lançamentos" color="green" />
         <StatCard label="Custo acumulado" value={fmt(cu)} icon={<IconMinus size={14} />} sub="insumos consumidos" color="red" />
-        <StatCard label="Lucro líquido" value={fmt(lu)} icon={<IconTrendingUp size={14} />} sub="receita − custo" color="purple" />
+        <StatCard label="Lucro líquido" value={fmt(lu)} icon={<IconTrendingUp size={14} />} sub="receita − custo − despesas" color="purple" />
       </div>
+
+      <Card className="mb-3.5">
+        <CardHeader
+          title="Lançamentos"
+          icon={<IconCash size={17} />}
+          action={
+            <Btn variant="primary" size="sm" onClick={() => setLancamentoModalOpen(true)}>
+              <IconPlus size={16} /> Novo
+            </Btn>
+          }
+        />
+        {!lancamentos.length ? (
+          <p className="py-5 text-center text-[13px] text-[var(--text-hint)]">Nenhum lançamento manual</p>
+        ) : (
+          <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+            <table className="w-full border-collapse text-[13px]">
+              <thead>
+                <tr>
+                  {['Data', 'Tipo', 'Descrição', 'Valor', 'Ações'].map((h) => (
+                    <th
+                      key={h}
+                      className="whitespace-nowrap border-b border-[var(--border)] bg-[var(--tbl-head)] px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[var(--text-hint)]"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {lancamentos.map((l) => (
+                  <tr key={l.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
+                    <td className="px-3 py-2.5 text-[var(--text)]">{fd(l.data)}</td>
+                    <td className="px-3 py-2.5">
+                      <Badge color={l.tipo === 'entrada' ? 'green' : 'red'}>{l.tipo === 'entrada' ? 'Entrada' : 'Despesa'}</Badge>
+                    </td>
+                    <td className="px-3 py-2.5 text-[var(--text)]">{l.descricao || '—'}</td>
+                    <td className="px-3 py-2.5 font-semibold" style={{ color: l.tipo === 'entrada' ? 'var(--green)' : 'var(--red)' }}>
+                      {l.tipo === 'entrada' ? '+' : '−'} {fmt(l.valor)}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Btn size="xs" variant="danger" onClick={() => handleDeleteLancamento(l.id)}>
+                        <IconTrash size={14} />
+                      </Btn>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
 
       <Card>
         <CardHeader
@@ -163,6 +230,8 @@ export default function CaixaPage() {
           )}
         </div>
       </Card>
+
+      <LancamentoModal open={lancamentoModalOpen} onClose={() => setLancamentoModalOpen(false)} />
     </div>
   );
 }

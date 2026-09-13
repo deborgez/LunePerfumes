@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Cliente, Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from './types';
+import type { Cliente, Essencia, Genero, Insumo, Lancamento, Perfume, ReceitaItem, Venda, VendaStatus } from './types';
 
 export async function getEssencias(): Promise<Essencia[]> {
   const { data, error } = await supabase.from('essencias').select('*').order('created_at', { ascending: true });
@@ -23,6 +23,11 @@ export async function getVendas(): Promise<Venda[]> {
 }
 export async function getClientes(): Promise<Cliente[]> {
   const { data, error } = await supabase.from('clientes').select('*').order('nome', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+export async function getLancamentos(): Promise<Lancamento[]> {
+  const { data, error } = await supabase.from('lancamentos').select('*').order('data', { ascending: false });
   if (error) throw error;
   return data || [];
 }
@@ -62,6 +67,7 @@ export async function createPerfume(body: {
   marca: string;
   genero: Genero;
   inspiracao: string;
+  fornecedor?: string | null;
   ml: number;
   preco: number;
   receita: ReceitaItem[];
@@ -72,7 +78,7 @@ export async function createPerfume(body: {
 }
 export async function updatePerfume(
   id: number,
-  body: { nome: string; marca: string; genero: Genero; inspiracao: string; ml: number; preco: number; receita: ReceitaItem[] }
+  body: { nome: string; marca: string; genero: Genero; inspiracao: string; fornecedor?: string | null; ml: number; preco: number; receita: ReceitaItem[] }
 ): Promise<Perfume> {
   const { data, error } = await supabase.from('perfumes').update(body).eq('id', id).select();
   if (error) throw error;
@@ -126,6 +132,16 @@ export async function updateCliente(id: number, body: Partial<Cliente>): Promise
 }
 export async function deleteCliente(id: number): Promise<void> {
   const { error } = await supabase.from('clientes').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function createLancamento(body: Omit<Lancamento, 'id' | 'created_at'>): Promise<Lancamento> {
+  const { data, error } = await supabase.from('lancamentos').insert(body).select();
+  if (error) throw error;
+  return data![0];
+}
+export async function deleteLancamento(id: number): Promise<void> {
+  const { error } = await supabase.from('lancamentos').delete().eq('id', id);
   if (error) throw error;
 }
 

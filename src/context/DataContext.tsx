@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useState, ReactNode 
 import { useToast } from './ToastContext';
 import * as q from '@/lib/queries';
 import { fmt, tod } from '@/lib/format';
-import type { Cliente, Essencia, Genero, Insumo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
+import type { Cliente, Essencia, Genero, Insumo, Lancamento, LancamentoTipo, Perfume, ReceitaItem, Venda, VendaStatus } from '@/lib/types';
 
 type SyncStatus = 'spin' | 'ok' | 'err';
 
@@ -14,6 +14,7 @@ interface DataContextValue {
   perfumes: Perfume[];
   vendas: Venda[];
   clientes: Cliente[];
+  lancamentos: Lancamento[];
   syncStatus: SyncStatus;
   syncMsg: string;
   loading: boolean;
@@ -34,12 +35,15 @@ interface DataContextValue {
 
   savePerfume: (
     id: number | null,
-    body: { nome: string; marca: string; genero: Genero; inspiracao: string; ml: number; preco: number; receita: ReceitaItem[] }
+    body: { nome: string; marca: string; genero: Genero; inspiracao: string; fornecedor?: string | null; ml: number; preco: number; receita: ReceitaItem[] }
   ) => Promise<boolean>;
   deletePerfume: (id: number) => Promise<void>;
 
   saveCliente: (id: number | null, body: Omit<Cliente, 'id' | 'created_at'>) => Promise<boolean>;
   deleteCliente: (id: number) => Promise<void>;
+
+  saveLancamento: (body: { tipo: LancamentoTipo; descricao: string; valor: number; data: string }) => Promise<boolean>;
+  deleteLancamento: (id: number) => Promise<void>;
 
   vender: (params: {
     perfId: number;
@@ -63,6 +67,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
   const [vendas, setVendas] = useState<Venda[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [lancamentos, setLancamentos] = useState<Lancamento[]>([]);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('spin');
   const [syncMsg, setSyncMsg] = useState('Conectando...');
   const [loading, setLoading] = useState(true);
@@ -71,18 +76,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setSyncStatus('spin');
     setSyncMsg('Sincronizando...');
     try {
-      const [ess, ins, perf, vend, cli] = await Promise.all([
+      const [ess, ins, perf, vend, cli, lanc] = await Promise.all([
         q.getEssencias(),
         q.getInsumos(),
         q.getPerfumes(),
         q.getVendas(),
         q.getClientes(),
+        q.getLancamentos(),
       ]);
       setEssencias(ess);
       setInsumos(ins);
       setPerfumes(perf);
       setVendas(vend);
       setClientes(cli);
+      setLancamentos(lanc);
       setSyncStatus('ok');
       setSyncMsg('Sincronizado');
       setLoading(false);
@@ -176,7 +183,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   async function savePerfume(
     id: number | null,
-    body: { nome: string; marca: string; genero: Genero; inspiracao: string; ml: number; preco: number; receita: ReceitaItem[] }
+    body: { nome: string; marca: string; genero: Genero; inspiracao: string; fornecedor?: string | null; ml: number; preco: number; receita: ReceitaItem[] }
   ) {
     try {
       if (id) {
@@ -227,6 +234,28 @@ export function DataProvider({ children }: { children: ReactNode }) {
     try {
       await q.deleteCliente(id);
       setClientes((prev) => prev.filter((x) => x.id !== id));
+      toast('Removido');
+    } catch {
+      toast('Erro', 'err');
+    }
+  }
+
+  async function saveLancamento(body: { tipo: LancamentoTipo; descricao: string; valor: number; data: string }) {
+    try {
+      const r = await q.createLancamento(body);
+      setLancamentos((prev) => [r, ...prev]);
+      toast('Lançamento registrado!', 'ok');
+      return true;
+    } catch (e) {
+      toast('Erro: ' + (e as Error).message, 'err');
+      return false;
+    }
+  }
+
+  async function deleteLancamentoFn(id: number) {
+    try {
+      await q.deleteLancamento(id);
+      setLancamentos((prev) => prev.filter((x) => x.id !== id));
       toast('Removido');
     } catch {
       toast('Erro', 'err');
@@ -380,6 +409,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         perfumes,
         vendas,
         clientes,
+        lancamentos,
         syncStatus,
         syncMsg,
         loading,
@@ -393,6 +423,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         deletePerfume: deletePerfumeFn,
         saveCliente,
         deleteCliente: deleteClienteFn,
+        saveLancamento,
+        deleteLancamento: deleteLancamentoFn,
         vender,
         baixarVenda,
       }}

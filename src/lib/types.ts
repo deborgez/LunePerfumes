@@ -42,6 +42,7 @@ export interface Perfume {
   marca: string;
   genero: Genero;
   inspiracao: string | null;
+  fornecedor: string | null;
   ml: number;
   preco: number;
   receita: ReceitaItem[];
@@ -74,6 +75,17 @@ export interface Venda {
   receita_valor: number;
   custo_valor: number;
   lucro_valor: number;
+  created_at?: string;
+}
+
+export type LancamentoTipo = 'entrada' | 'despesa';
+
+export interface Lancamento {
+  id: number;
+  tipo: LancamentoTipo;
+  descricao: string | null;
+  valor: number;
+  data: string;
   created_at?: string;
 }
 

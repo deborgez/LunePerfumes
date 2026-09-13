@@ -23,6 +23,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
   const [marca, setMarca] = useState('');
   const [genero, setGenero] = useState<Genero>('compartilhavel');
   const [inspiracao, setInspiracao] = useState('');
+  const [fornecedor, setFornecedor] = useState('');
   const [ml, setMl] = useState(0);
   const [preco, setPreco] = useState(0);
   const [recRows, setRecRows] = useState<ReceitaItem[]>([]);
@@ -38,6 +39,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       setMarca(editing.marca);
       setGenero(editing.genero || 'compartilhavel');
       setInspiracao(editing.inspiracao || '');
+      setFornecedor(editing.fornecedor || '');
       setMl(editing.ml);
       setPreco(editing.preco);
       const rec: ReceitaItem[] = Array.isArray(editing.receita)
@@ -49,6 +51,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       setMarca('');
       setGenero('compartilhavel');
       setInspiracao('');
+      setFornecedor('');
       setMl(0);
       setPreco(0);
       setRecRows(buildDefaultReceita(essencias, insumos));
@@ -95,6 +98,7 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
       marca: marcaT,
       genero,
       inspiracao: inspiracao.trim(),
+      fornecedor: fornecedor.trim() || null,
       ml,
       preco,
       receita: recRows.map((r) => ({ tipo: r.tipo, itemId: r.itemId, qtd: r.qtd })),
@@ -148,6 +152,11 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
           <Input placeholder="Ex: Bleu de Chanel" value={inspiracao} onChange={(e) => setInspiracao(e.target.value)} />
         </FormGroup>
       </div>
+      <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
+        <FormGroup label="Fornecedor (opcional)">
+          <Input placeholder="Ex: Big Essências" value={fornecedor} onChange={(e) => setFornecedor(e.target.value)} />
+        </FormGroup>
+      </div>
 
       <div className="my-3.5 h-px bg-[var(--border)]" />
 
@@ -168,11 +177,24 @@ export default function PerfumeModal({ open, onClose, editing }: PerfumeModalPro
                 value={`${r.tipo}|${r.itemId}`}
                 onChange={(e) => updateRowItem(i, e.target.value)}
               >
-                {items.map((x) => (
-                  <option key={`${x.tipo}|${x.id}`} value={`${x.tipo}|${x.id}`}>
-                    {x.nome}
-                  </option>
-                ))}
+                <optgroup label="Essências">
+                  {items
+                    .filter((x) => x.tipo === 'essencia')
+                    .map((x) => (
+                      <option key={`${x.tipo}|${x.id}`} value={`${x.tipo}|${x.id}`}>
+                        {x.nome}
+                      </option>
+                    ))}
+                </optgroup>
+                <optgroup label="Insumos">
+                  {items
+                    .filter((x) => x.tipo === 'insumo')
+                    .map((x) => (
+                      <option key={`${x.tipo}|${x.id}`} value={`${x.tipo}|${x.id}`}>
+                        {x.nome}
+                      </option>
+                    ))}
+                </optgroup>
               </select>
               <MaskedDecimalInput
                 size="sm"
