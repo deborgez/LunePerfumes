@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'Panton';
+  font-weight: 700;
+  font-style: normal;
+  src: url('/fonts/Panton-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100vh;
+  margin: 0;
+}
