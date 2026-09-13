@@ -3,7 +3,7 @@ import type { Venda } from '@/lib/types';
 
 const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-export default function RevenueChart({ vendas }: { vendas: Venda[] }) {
+export default function SalesChart({ vendas }: { vendas: Venda[] }) {
   const ma = new Date().getMonth();
   const ano = new Date().getFullYear();
   const labels: string[] = [];
@@ -13,7 +13,6 @@ export default function RevenueChart({ vendas }: { vendas: Venda[] }) {
     labels.push(MESES[idx]);
     let soma = 0;
     vendas.forEach((v) => {
-      if (v.status !== 'pago') return;
       const vm = parseInt((v.data || '').split('-')[1] || '0') - 1;
       const vy = parseInt((v.data || '').split('-')[0]);
       if (vm === idx && vy === ano) soma += v.receita_valor || 0;

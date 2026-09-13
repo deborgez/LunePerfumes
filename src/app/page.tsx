@@ -4,6 +4,7 @@ import { IconCash, IconClock, IconTrendingUp, IconChartBar, IconFlask, IconPacka
 import { useData } from '@/context/DataContext';
 import { StatCard, Card, CardHeader } from '@/components/shared/ui';
 import RevenueChart from '@/components/dashboard/RevenueChart';
+import SalesChart from '@/components/dashboard/SalesChart';
 import PrazoList from '@/components/dashboard/PrazoList';
 import StockBars from '@/components/dashboard/StockBars';
 import { fmt } from '@/lib/format';
@@ -70,10 +71,14 @@ export default function DashboardPage() {
         </div>
       </Card>
 
-      <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
         <Card>
           <CardHeader title="Receita por mês" icon={<IconChartBar size={17} />} />
           <RevenueChart vendas={vendas} />
+        </Card>
+        <Card>
+          <CardHeader title="Vendas por mês" icon={<IconChartBar size={17} />} />
+          <SalesChart vendas={vendas} />
         </Card>
         <Card>
           <CardHeader title="A receber" icon={<IconClock size={17} />} />
