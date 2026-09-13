@@ -11,7 +11,7 @@ import { ESSENCIA_ESTOQUE_REF, sortByEstoqueAsc } from '@/lib/business';
 import { GENEROS, GENERO_LABEL } from '@/lib/genero';
 
 export default function DashboardPage() {
-  const { vendas, essencias, insumos, perfumes } = useData();
+  const { vendas, essencias, insumos, perfumes, lancamentos } = useData();
   const essenciasOrdenadas = sortByEstoqueAsc(essencias);
   const porGenero = GENEROS.map((g) => ({
     genero: g,
@@ -32,6 +32,11 @@ export default function DashboardPage() {
       pend += v.receita_valor || 0;
     }
   });
+  lancamentos.forEach((l) => {
+    const sinal = l.tipo === 'entrada' ? 1 : -1;
+    cx += sinal * (l.valor || 0);
+    lu += sinal * (l.valor || 0);
+  });
 
   return (
     <div>
@@ -40,7 +45,7 @@ export default function DashboardPage() {
           label="Caixa"
           value={fmt(cx)}
           icon={<IconCash size={14} />}
-          sub={`${vendas.filter((v) => v.status === 'pago').length} vendas pagas`}
+          sub={`${vendas.filter((v) => v.status === 'pago').length} vendas pagas + lançamentos`}
           color="green"
         />
         <StatCard
