@@ -1,20 +1,17 @@
 'use client';
 
-import { IconCash, IconClock, IconTrendingUp, IconChartBar, IconFlask, IconPackage, IconDroplet } from '@tabler/icons-react';
+import { IconCash, IconClock, IconTrendingUp, IconChartBar, IconDroplet } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
 import { StatCard, Card, CardHeader } from '@/components/shared/ui';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import SalesChart from '@/components/dashboard/SalesChart';
 import PrazoList from '@/components/dashboard/PrazoList';
-import StockBars from '@/components/dashboard/StockBars';
 import { fmt } from '@/lib/format';
-import { ESSENCIA_ESTOQUE_REF, sortByEstoqueAsc } from '@/lib/business';
 import { GENEROS, GENERO_LABEL } from '@/lib/genero';
 import { contarVendasDistintas } from '@/lib/vendasGrouping';
 
 export default function DashboardPage() {
-  const { vendas, essencias, insumos, perfumes, lancamentos } = useData();
-  const essenciasOrdenadas = sortByEstoqueAsc(essencias);
+  const { vendas, perfumes, lancamentos } = useData();
   const porGenero = GENEROS.map((g) => ({
     genero: g,
     label: GENERO_LABEL[g],
@@ -71,7 +68,7 @@ export default function DashboardPage() {
         </div>
       </Card>
 
-      <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+      <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <Card>
           <CardHeader title="Receita por mês" icon={<IconChartBar size={17} />} />
           <RevenueChart vendas={vendas} />
@@ -80,22 +77,12 @@ export default function DashboardPage() {
           <CardHeader title="Vendas por mês" icon={<IconChartBar size={17} />} />
           <SalesChart vendas={vendas} />
         </Card>
-        <Card>
-          <CardHeader title="A receber" icon={<IconClock size={17} />} />
-          <PrazoList vendas={vendas} perfumes={perfumes} />
-        </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Card>
-          <CardHeader title="Estoque essências" icon={<IconFlask size={17} />} />
-          <StockBars list={essenciasOrdenadas} forceTipo="ml" refValue={ESSENCIA_ESTOQUE_REF} />
-        </Card>
-        <Card>
-          <CardHeader title="Estoque insumos" icon={<IconPackage size={17} />} />
-          <StockBars list={insumos} />
-        </Card>
-      </div>
+      <Card>
+        <CardHeader title="A receber" icon={<IconClock size={17} />} />
+        <PrazoList vendas={vendas} perfumes={perfumes} />
+      </Card>
     </div>
   );
 }
