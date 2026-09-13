@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { Btn, Badge } from '@/components/shared/ui';
-import { IconCash, IconTag, IconTrash } from '@tabler/icons-react';
+import { IconCash, IconEdit, IconTag, IconTrash } from '@tabler/icons-react';
 import { fd, fmt } from '@/lib/format';
 import { agruparPorClienteECompra, type CompraGroup } from '@/lib/vendasGrouping';
 import { baixarEtiqueta } from '@/lib/etiqueta';
 import { useToast } from '@/context/ToastContext';
+import VendaEditModal from './VendaEditModal';
 import type { Perfume, Venda } from '@/lib/types';
 
 export default function VendasList({
@@ -22,6 +24,7 @@ export default function VendasList({
   onExcluir?: (itens: Venda[]) => void;
 }) {
   const toast = useToast();
+  const [editando, setEditando] = useState<Venda[] | null>(null);
   const filtradas = vendas.filter((v) => v.tipo === tipo);
   if (!filtradas.length) {
     return <p className="py-2 text-[13px] text-[var(--text-hint)]">Nenhuma venda {tipo === 'avista' ? 'à vista' : 'a prazo'}.</p>;
@@ -60,8 +63,14 @@ export default function VendasList({
                     {compra.parcelaTotal && compra.parcelaTotal > 1 ? (
                       <span className="ml-1.5 text-[11px] font-normal text-[var(--text-hint)]">· {compra.parcelaTotal}x</span>
                     ) : null}
+                    {compra.itens[0]?.vendedor ? (
+                      <span className="ml-1.5 text-[11px] font-normal text-[var(--text-hint)]">· vendido por {compra.itens[0].vendedor}</span>
+                    ) : null}
                   </div>
                   <div className="flex gap-1.5">
+                    <Btn size="xs" onClick={() => setEditando(compra.itens)}>
+                      <IconEdit size={14} />
+                    </Btn>
                     <Btn size="xs" onClick={() => handleEtiqueta(c.clienteNome, compra.perfumeNome)}>
                       <IconTag size={14} /> Etiqueta
                     </Btn>
@@ -91,6 +100,7 @@ export default function VendasList({
           </div>
         );
       })}
+      <VendaEditModal itens={editando} onClose={() => setEditando(null)} />
     </div>
   );
 }

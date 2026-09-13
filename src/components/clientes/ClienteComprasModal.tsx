@@ -29,6 +29,9 @@ export default function ClienteComprasModal({ cliente, vendas, perfumes, onClose
               <div className="mb-1.5 flex items-center justify-between">
                 <span className="text-[13px] font-semibold text-[var(--text)]">
                   {compra.perfumeNome}&nbsp;×{compra.qty}
+                  {compra.itens[0]?.vendedor ? (
+                    <span className="ml-1.5 text-[11px] font-normal text-[var(--text-hint)]">· vendido por {compra.itens[0].vendedor}</span>
+                  ) : null}
                 </span>
                 <Badge color="purple">{fmt(totalCompra)}</Badge>
               </div>

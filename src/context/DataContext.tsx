@@ -50,6 +50,19 @@ interface DataContextValue {
   deleteLancamento: (id: number) => Promise<void>;
 
   deleteVendaCompra: (itens: Venda[]) => Promise<void>;
+  editarVendaCompra: (
+    itens: Venda[],
+    updates: {
+      perfId: number;
+      qty: number;
+      precoUnit: number;
+      cliente: string;
+      clienteId: number | null;
+      vendedor: string;
+      vendedorId: number | null;
+      venc?: string;
+    }
+  ) => Promise<boolean>;
 
   vender: (params: {
     perfId: number;
@@ -335,6 +348,101 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function ajustarEstoquePorReceita(perfId: number, deltaQty: number, sinal: 1 | -1) {
+    if (!deltaQty) return;
+    const p = perfumes.find((x) => x.id === perfId);
+    if (!p) return;
+    const rec = Array.isArray(p.receita) ? p.receita : JSON.parse((p.receita as unknown as string) || '[]');
+    for (const r of rec) {
+      const itemId = r.itemId ?? r.item_id;
+      const lista = r.tipo === 'essencia' ? essencias : insumos;
+      const it = lista.find((x) => x.id === itemId);
+      if (it) {
+        const ne = Math.max(0, it.estoque - sinal * r.qtd * deltaQty);
+        await q.patchEstoque(r.tipo === 'essencia' ? 'essencias' : 'insumos', it.id, ne);
+        if (r.tipo === 'essencia') {
+          setEssencias((prev) => prev.map((x) => (x.id === it.id ? { ...x, estoque: ne } : x)));
+        } else {
+          setInsumos((prev) => prev.map((x) => (x.id === it.id ? { ...x, estoque: ne } : x)));
+        }
+      }
+    }
+  }
+
+  async function editarVendaCompra(
+    itens: Venda[],
+    updates: {
+      perfId: number;
+      qty: number;
+      precoUnit: number;
+      cliente: string;
+      clienteId: number | null;
+      vendedor: string;
+      vendedorId: number | null;
+      venc?: string;
+    }
+  ) {
+    if (!itens.length) return false;
+    const { perfId, qty, precoUnit, cliente, clienteId, vendedor, vendedorId, venc } = updates;
+    const oldPerfId = itens[0].perf_id;
+    const oldQty = itens[0].qty;
+
+    try {
+      if (perfId !== oldPerfId) {
+        await ajustarEstoquePorReceita(oldPerfId, oldQty, -1);
+        await ajustarEstoquePorReceita(perfId, qty, 1);
+      } else if (qty !== oldQty) {
+        await ajustarEstoquePorReceita(perfId, qty - oldQty, 1);
+      }
+
+      const total = precoUnit * qty;
+      let atualizadas: Venda[];
+      if (itens.length > 1) {
+        const totalCents = Math.round(total * 100);
+        const baseCents = Math.floor(totalCents / itens.length);
+        const remainderCents = totalCents - baseCents * itens.length;
+        const ordenadas = [...itens].sort((a, b) => (a.parcela_num || 0) - (b.parcela_num || 0));
+        atualizadas = await Promise.all(
+          ordenadas.map((v, i) => {
+            const cents = baseCents + (i === 0 ? remainderCents : 0);
+            const valor = cents / 100;
+            return q.updateVenda(v.id, {
+              perf_id: perfId,
+              qty,
+              cliente: cliente || '',
+              cliente_id: clienteId,
+              vendedor: vendedor || null,
+              vendedor_id: vendedorId,
+              receita_valor: valor,
+              lucro_valor: valor,
+            });
+          })
+        );
+      } else {
+        const v = itens[0];
+        const r = await q.updateVenda(v.id, {
+          perf_id: perfId,
+          qty,
+          cliente: cliente || '',
+          cliente_id: clienteId,
+          vendedor: vendedor || null,
+          vendedor_id: vendedorId,
+          venc: venc ?? v.venc,
+          receita_valor: total,
+          lucro_valor: total,
+        });
+        atualizadas = [r];
+      }
+
+      setVendas((prev) => prev.map((x) => atualizadas.find((u) => u.id === x.id) || x));
+      toast('Venda atualizada!', 'ok');
+      return true;
+    } catch (e) {
+      toast('Erro: ' + (e as Error).message, 'err');
+      return false;
+    }
+  }
+
   async function vender(params: {
     perfId: number;
     qty: number;
@@ -511,6 +619,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         saveLancamento,
         deleteLancamento: deleteLancamentoFn,
         deleteVendaCompra,
+        editarVendaCompra,
         vender,
         baixarVenda,
       }}
