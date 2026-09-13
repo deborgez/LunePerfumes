@@ -1,7 +1,9 @@
 import { Btn, Badge } from '@/components/shared/ui';
-import { IconCash } from '@tabler/icons-react';
+import { IconCash, IconTag } from '@tabler/icons-react';
 import { fd, fmt } from '@/lib/format';
 import { agruparPorClienteECompra } from '@/lib/vendasGrouping';
+import { baixarEtiqueta } from '@/lib/etiqueta';
+import { useToast } from '@/context/ToastContext';
 import type { Perfume, Venda } from '@/lib/types';
 
 export default function PrazoPendentesList({
@@ -13,6 +15,16 @@ export default function PrazoPendentesList({
   perfumes: Perfume[];
   onReceber: (v: Venda) => void;
 }) {
+  const toast = useToast();
+
+  async function handleEtiqueta(clienteNome: string, perfumeNome: string) {
+    try {
+      await baixarEtiqueta(clienteNome, perfumeNome);
+    } catch {
+      toast('Falha ao gerar a etiqueta', 'err');
+    }
+  }
+
   const pendentes = vendas.filter((v) => v.status === 'pendente');
   if (!pendentes.length) {
     return <p className="py-2 text-[13px] text-[var(--text-hint)]">Nenhuma conta pendente.</p>;
@@ -31,13 +43,18 @@ export default function PrazoPendentesList({
             </div>
             {c.compras.map((compra) => (
               <div key={compra.key} className="mb-2 rounded-lg bg-[var(--surface2)] p-2.5 last:mb-0">
-                <div className="mb-1.5 text-[12px] font-medium text-[var(--text)]">
-                  {compra.perfumeNome}&nbsp;×{compra.qty}
-                  {compra.parcelaTotal && compra.parcelaTotal > 1 ? (
-                    <span className="ml-1.5 text-[11px] font-normal text-[var(--text-hint)]">
-                      · {compra.itens.length} de {compra.parcelaTotal} parcela{compra.parcelaTotal > 1 ? 's' : ''} em aberto
-                    </span>
-                  ) : null}
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <div className="text-[12px] font-medium text-[var(--text)]">
+                    {compra.perfumeNome}&nbsp;×{compra.qty}
+                    {compra.parcelaTotal && compra.parcelaTotal > 1 ? (
+                      <span className="ml-1.5 text-[11px] font-normal text-[var(--text-hint)]">
+                        · {compra.itens.length} de {compra.parcelaTotal} parcela{compra.parcelaTotal > 1 ? 's' : ''} em aberto
+                      </span>
+                    ) : null}
+                  </div>
+                  <Btn size="xs" onClick={() => handleEtiqueta(c.clienteNome, compra.perfumeNome)}>
+                    <IconTag size={14} /> Etiqueta
+                  </Btn>
                 </div>
                 {compra.itens.map((v) => (
                   <div key={v.id} className="flex items-center gap-2.5 py-1">
