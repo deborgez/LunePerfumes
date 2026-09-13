@@ -1,17 +1,17 @@
 'use client';
 
-import { IconCash, IconClock, IconTrendingUp, IconChartBar, IconDroplet } from '@tabler/icons-react';
+import { IconCash, IconClock, IconTrendingUp, IconChartBar, IconDroplet, IconCrown } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
 import { StatCard, Card, CardHeader } from '@/components/shared/ui';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import SalesChart from '@/components/dashboard/SalesChart';
-import PrazoList from '@/components/dashboard/PrazoList';
+import TopClientes from '@/components/dashboard/TopClientes';
 import { fmt } from '@/lib/format';
 import { GENEROS, GENERO_LABEL } from '@/lib/genero';
 import { contarVendasDistintas } from '@/lib/vendasGrouping';
 
 export default function DashboardPage() {
-  const { vendas, perfumes, lancamentos } = useData();
+  const { vendas, perfumes, clientes, lancamentos } = useData();
   const porGenero = GENEROS.map((g) => ({
     genero: g,
     label: GENERO_LABEL[g],
@@ -80,8 +80,8 @@ export default function DashboardPage() {
       </div>
 
       <Card>
-        <CardHeader title="A receber" icon={<IconClock size={17} />} />
-        <PrazoList vendas={vendas} perfumes={perfumes} />
+        <CardHeader title="Top clientes" icon={<IconCrown size={17} />} />
+        <TopClientes clientes={clientes} vendas={vendas} />
       </Card>
     </div>
   );

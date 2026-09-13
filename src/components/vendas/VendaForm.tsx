@@ -8,7 +8,6 @@ import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
 import { gi, receitaOf } from '@/lib/business';
 import { fmt } from '@/lib/format';
-import { baixarEtiqueta } from '@/lib/etiqueta';
 
 export default function VendaForm() {
   const { perfumes, essencias, insumos, clientes, vender } = useData();
@@ -73,13 +72,6 @@ export default function VendaForm() {
     });
     setSaving(false);
     if (ok) {
-      if (p) {
-        try {
-          await baixarEtiqueta(cli?.nome || '', p.nome);
-        } catch {
-          toast('Venda registrada, mas falhou ao gerar a etiqueta', 'err');
-        }
-      }
       setQty('1');
       setClienteId('');
       setVenc('');
