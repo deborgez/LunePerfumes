@@ -8,7 +8,7 @@ export default function TopClientes({ clientes, vendas }: { clientes: Cliente[];
   const ranking = clientes
     .map((c) => ({ cliente: c, s: stats.get(c.id) || { perfumesComprados: 0, totalRecebido: 0 } }))
     .filter((r) => r.s.perfumesComprados > 0)
-    .sort((a, b) => b.s.totalRecebido - a.s.totalRecebido)
+    .sort((a, b) => b.s.perfumesComprados - a.s.perfumesComprados)
     .slice(0, 5);
 
   if (!ranking.length) {
