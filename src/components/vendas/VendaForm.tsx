@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { IconCheck, IconShoppingCart } from '@tabler/icons-react';
 import { Btn, Card, CardHeader, FormGroup, Input, Select } from '@/components/shared/ui';
+import SearchSelect from '@/components/shared/SearchSelect';
 import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
 import { gi, receitaOf } from '@/lib/business';
@@ -84,20 +85,19 @@ export default function VendaForm() {
       <CardHeader title="Nova venda" icon={<IconShoppingCart size={17} />} />
       <div className="mb-2.5">
         <FormGroup label="Perfume">
-          <Select
-            value={currentPerfId ?? ''}
-            onChange={(e) => setPerfId(parseInt(e.target.value))}
-          >
-            {!perfumes.length ? (
+          {!perfumes.length ? (
+            <Select disabled value="">
               <option value="">— Cadastre perfumes primeiro —</option>
-            ) : (
-              perfumes.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nome} — {fmt(p.preco)}
-                </option>
-              ))
-            )}
-          </Select>
+            </Select>
+          ) : (
+            <SearchSelect
+              options={perfumes.map((p) => ({ value: p.id, label: p.nome, sublabel: `${p.marca} — ${fmt(p.preco)}` }))}
+              value={currentPerfId ?? ''}
+              onChange={setPerfId}
+              placeholder="Buscar perfume..."
+              emptyMessage="Nenhum perfume encontrado"
+            />
+          )}
         </FormGroup>
       </div>
       <div className="mb-2.5 grid grid-cols-1 gap-2.5 md:grid-cols-2">
@@ -114,14 +114,20 @@ export default function VendaForm() {
 
       <div className="mb-2.5">
         <FormGroup label={tipo === 'prazo' ? 'Cliente' : 'Cliente (opcional)'}>
-          <Select value={clienteId} onChange={(e) => setClienteId(e.target.value ? parseInt(e.target.value) : '')}>
-            <option value="">{clientes.length ? 'Selecione...' : '— Cadastre clientes primeiro —'}</option>
-            {clientes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nome}
-              </option>
-            ))}
-          </Select>
+          {!clientes.length ? (
+            <Select disabled value="">
+              <option value="">— Cadastre clientes primeiro —</option>
+            </Select>
+          ) : (
+            <SearchSelect
+              options={clientes.map((c) => ({ value: c.id, label: c.nome }))}
+              value={clienteId}
+              onChange={setClienteId}
+              placeholder="Buscar cliente..."
+              emptyMessage="Nenhum cliente encontrado"
+              allowClear
+            />
+          )}
         </FormGroup>
       </div>
 
