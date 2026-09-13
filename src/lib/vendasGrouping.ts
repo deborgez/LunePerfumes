@@ -28,18 +28,20 @@ export function contarVendasDistintas(vendas: Venda[]): number {
 export interface ClienteStats {
   perfumesComprados: number;
   totalRecebido: number;
+  totalVendido: number;
 }
 
 // Perfumes comprados soma a quantidade de cada compra distinta uma única vez
 // (evita contar 3x uma compra parcelada em 3x); total recebido soma o valor
-// de toda parcela/venda já paga daquele cliente.
+// de toda parcela/venda já paga daquele cliente, enquanto total vendido soma
+// o valor de toda venda (paga ou pendente).
 export function statsPorCliente(vendas: Venda[]): Map<number, ClienteStats> {
   const stats = new Map<number, ClienteStats>();
   const comprasVistas = new Set<string>();
 
   for (const v of vendas) {
     if (v.cliente_id == null) continue;
-    if (!stats.has(v.cliente_id)) stats.set(v.cliente_id, { perfumesComprados: 0, totalRecebido: 0 });
+    if (!stats.has(v.cliente_id)) stats.set(v.cliente_id, { perfumesComprados: 0, totalRecebido: 0, totalVendido: 0 });
     const s = stats.get(v.cliente_id)!;
 
     const compraKey = chaveDaCompra(v);
@@ -47,6 +49,7 @@ export function statsPorCliente(vendas: Venda[]): Map<number, ClienteStats> {
       comprasVistas.add(compraKey);
       s.perfumesComprados += v.qty;
     }
+    s.totalVendido += v.receita_valor || 0;
     if (v.status === 'pago') s.totalRecebido += v.receita_valor || 0;
   }
   return stats;
@@ -59,7 +62,7 @@ export function statsPorVendedor(vendas: Venda[]): Map<number, ClienteStats> {
 
   for (const v of vendas) {
     if (v.vendedor_id == null) continue;
-    if (!stats.has(v.vendedor_id)) stats.set(v.vendedor_id, { perfumesComprados: 0, totalRecebido: 0 });
+    if (!stats.has(v.vendedor_id)) stats.set(v.vendedor_id, { perfumesComprados: 0, totalRecebido: 0, totalVendido: 0 });
     const s = stats.get(v.vendedor_id)!;
 
     const compraKey = chaveDaCompra(v);
@@ -67,6 +70,7 @@ export function statsPorVendedor(vendas: Venda[]): Map<number, ClienteStats> {
       comprasVistas.add(compraKey);
       s.perfumesComprados += v.qty;
     }
+    s.totalVendido += v.receita_valor || 0;
     if (v.status === 'pago') s.totalRecebido += v.receita_valor || 0;
   }
   return stats;

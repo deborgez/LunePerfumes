@@ -6,7 +6,7 @@ import type { Cliente, Venda } from '@/lib/types';
 export default function TopClientes({ clientes, vendas }: { clientes: Cliente[]; vendas: Venda[] }) {
   const stats = statsPorCliente(vendas);
   const ranking = clientes
-    .map((c) => ({ cliente: c, s: stats.get(c.id) || { perfumesComprados: 0, totalRecebido: 0 } }))
+    .map((c) => ({ cliente: c, s: stats.get(c.id) || { perfumesComprados: 0, totalRecebido: 0, totalVendido: 0 } }))
     .filter((r) => r.s.perfumesComprados > 0)
     .sort((a, b) => b.s.perfumesComprados - a.s.perfumesComprados)
     .slice(0, 5);
@@ -26,7 +26,7 @@ export default function TopClientes({ clientes, vendas }: { clientes: Cliente[];
             <div className="text-[13px] font-medium text-[var(--text)]">{cliente.nome}</div>
             <div className="mt-0.5 text-[11px] text-[var(--text-hint)]">{s.perfumesComprados} perfume{s.perfumesComprados > 1 ? 's' : ''} comprado{s.perfumesComprados > 1 ? 's' : ''}</div>
           </div>
-          <Badge color="green">{fmt(s.totalRecebido)}</Badge>
+          <Badge color="green">{fmt(s.totalVendido)}</Badge>
         </div>
       ))}
     </div>

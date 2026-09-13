@@ -6,9 +6,9 @@ import type { Vendedor, Venda } from '@/lib/types';
 export default function TopVendedores({ vendedores, vendas }: { vendedores: Vendedor[]; vendas: Venda[] }) {
   const stats = statsPorVendedor(vendas);
   const ranking = vendedores
-    .map((v) => ({ vendedor: v, s: stats.get(v.id) || { perfumesComprados: 0, totalRecebido: 0 } }))
+    .map((v) => ({ vendedor: v, s: stats.get(v.id) || { perfumesComprados: 0, totalRecebido: 0, totalVendido: 0 } }))
     .filter((r) => r.s.perfumesComprados > 0)
-    .sort((a, b) => b.s.totalRecebido - a.s.totalRecebido)
+    .sort((a, b) => b.s.totalVendido - a.s.totalVendido)
     .slice(0, 5);
 
   if (!ranking.length) {
@@ -26,7 +26,7 @@ export default function TopVendedores({ vendedores, vendas }: { vendedores: Vend
             <div className="text-[13px] font-medium text-[var(--text)]">{vendedor.nome}</div>
             <div className="mt-0.5 text-[11px] text-[var(--text-hint)]">{s.perfumesComprados} perfume{s.perfumesComprados > 1 ? 's' : ''} vendido{s.perfumesComprados > 1 ? 's' : ''}</div>
           </div>
-          <Badge color="green">{fmt(s.totalRecebido)}</Badge>
+          <Badge color="green">{fmt(s.totalVendido)}</Badge>
         </div>
       ))}
     </div>
