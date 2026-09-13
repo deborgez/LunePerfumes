@@ -25,6 +25,33 @@ export function contarVendasDistintas(vendas: Venda[]): number {
   return new Set(vendas.map(chaveDaCompra)).size;
 }
 
+export interface ClienteStats {
+  perfumesComprados: number;
+  totalRecebido: number;
+}
+
+// Perfumes comprados soma a quantidade de cada compra distinta uma única vez
+// (evita contar 3x uma compra parcelada em 3x); total recebido soma o valor
+// de toda parcela/venda já paga daquele cliente.
+export function statsPorCliente(vendas: Venda[]): Map<number, ClienteStats> {
+  const stats = new Map<number, ClienteStats>();
+  const comprasVistas = new Set<string>();
+
+  for (const v of vendas) {
+    if (v.cliente_id == null) continue;
+    if (!stats.has(v.cliente_id)) stats.set(v.cliente_id, { perfumesComprados: 0, totalRecebido: 0 });
+    const s = stats.get(v.cliente_id)!;
+
+    const compraKey = chaveDaCompra(v);
+    if (!comprasVistas.has(compraKey)) {
+      comprasVistas.add(compraKey);
+      s.perfumesComprados += v.qty;
+    }
+    if (v.status === 'pago') s.totalRecebido += v.receita_valor || 0;
+  }
+  return stats;
+}
+
 export function agruparPorClienteECompra(vendas: Venda[], perfumes: Perfume[]): ClienteGroup[] {
   const clientesMap = new Map<string, ClienteGroup>();
 

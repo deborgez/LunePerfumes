@@ -5,6 +5,8 @@ import { IconUsers, IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
 import { Btn, Card, CardHeader, formatCPF, formatPhoneBR } from '@/components/shared/ui';
 import ClienteModal from '@/components/clientes/ClienteModal';
+import { fmt } from '@/lib/format';
+import { statsPorCliente } from '@/lib/vendasGrouping';
 import type { Cliente } from '@/lib/types';
 
 function ClienteExtras({ c }: { c: Cliente }) {
@@ -17,9 +19,10 @@ function ClienteExtras({ c }: { c: Cliente }) {
 }
 
 export default function ClientesPage() {
-  const { clientes, deleteCliente } = useData();
+  const { clientes, vendas, deleteCliente } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Cliente | null>(null);
+  const stats = statsPorCliente(vendas);
 
   function openNew() {
     setEditing(null);
@@ -52,7 +55,7 @@ export default function ClientesPage() {
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr>
-                {['Nome', 'Telefone', 'CPF', 'E-mail', 'Ações'].map((h) => (
+                {['Nome', 'Telefone', 'CPF', 'E-mail', 'Perfumes comprados', 'Total recebido', 'Ações'].map((h) => (
                   <th
                     key={h}
                     className="whitespace-nowrap border-b border-[var(--border)] bg-[var(--tbl-head)] px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[var(--text-hint)]"
@@ -65,33 +68,40 @@ export default function ClientesPage() {
             <tbody>
               {!clientes.length ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-[13px] text-[var(--text-hint)]">
+                  <td colSpan={7} className="p-8 text-center text-[13px] text-[var(--text-hint)]">
                     <IconUsers size={24} className="mx-auto mb-1.5" />
                     Nenhum cliente
                   </td>
                 </tr>
               ) : (
-                clientes.map((c) => (
-                  <tr key={c.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
-                    <td className="px-3 py-2.5 text-[var(--text)]">
-                      <strong>{c.nome}</strong>
-                      <ClienteExtras c={c} />
-                    </td>
-                    <td className="px-3 py-2.5 text-[var(--text)]">{c.telefone ? formatPhoneBR(c.telefone) : '—'}</td>
-                    <td className="px-3 py-2.5 text-[var(--text)]">{c.cpf ? formatCPF(c.cpf) : '—'}</td>
-                    <td className="px-3 py-2.5 text-[var(--text)]">{c.email || '—'}</td>
-                    <td className="px-3 py-2.5">
-                      <div className="flex gap-1.5">
-                        <Btn size="xs" onClick={() => openEdit(c)}>
-                          <IconEdit size={14} />
-                        </Btn>
-                        <Btn size="xs" variant="danger" onClick={() => handleDelete(c.id)}>
-                          <IconTrash size={14} />
-                        </Btn>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                clientes.map((c) => {
+                  const s = stats.get(c.id);
+                  return (
+                    <tr key={c.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
+                      <td className="px-3 py-2.5 text-[var(--text)]">
+                        <strong>{c.nome}</strong>
+                        <ClienteExtras c={c} />
+                      </td>
+                      <td className="px-3 py-2.5 text-[var(--text)]">{c.telefone ? formatPhoneBR(c.telefone) : '—'}</td>
+                      <td className="px-3 py-2.5 text-[var(--text)]">{c.cpf ? formatCPF(c.cpf) : '—'}</td>
+                      <td className="px-3 py-2.5 text-[var(--text)]">{c.email || '—'}</td>
+                      <td className="px-3 py-2.5 text-[var(--text)]">{s?.perfumesComprados || 0}</td>
+                      <td className="px-3 py-2.5 font-medium" style={{ color: 'var(--green)' }}>
+                        {fmt(s?.totalRecebido || 0)}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <div className="flex gap-1.5">
+                          <Btn size="xs" onClick={() => openEdit(c)}>
+                            <IconEdit size={14} />
+                          </Btn>
+                          <Btn size="xs" variant="danger" onClick={() => handleDelete(c.id)}>
+                            <IconTrash size={14} />
+                          </Btn>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -102,23 +112,38 @@ export default function ClientesPage() {
           {!clientes.length ? (
             <p className="py-5 text-center text-[13px] text-[var(--text-hint)]">Nenhum cliente cadastrado</p>
           ) : (
-            clientes.map((c) => (
-              <div key={c.id} className="mb-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-[var(--shadow)]">
-                <div className="text-sm font-semibold text-[var(--text)]">{c.nome}</div>
-                <div className="mt-[3px] text-xs text-[var(--text-muted)]">{c.telefone ? formatPhoneBR(c.telefone) : 'Sem telefone'}</div>
-                {c.cpf && <div className="mt-0.5 text-xs text-[var(--text-hint)]">CPF: {formatCPF(c.cpf)}</div>}
-                {c.email && <div className="mt-0.5 text-xs text-[var(--text-hint)]">{c.email}</div>}
-                <ClienteExtras c={c} />
-                <div className="mt-3 flex gap-1.5 border-t border-[var(--border)] pt-2.5">
-                  <Btn size="sm" className="flex-1" onClick={() => openEdit(c)}>
-                    <IconEdit size={14} /> Editar
-                  </Btn>
-                  <Btn size="sm" variant="danger" onClick={() => handleDelete(c.id)}>
-                    <IconTrash size={14} />
-                  </Btn>
+            clientes.map((c) => {
+              const s = stats.get(c.id);
+              return (
+                <div key={c.id} className="mb-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-[var(--shadow)]">
+                  <div className="text-sm font-semibold text-[var(--text)]">{c.nome}</div>
+                  <div className="mt-[3px] text-xs text-[var(--text-muted)]">{c.telefone ? formatPhoneBR(c.telefone) : 'Sem telefone'}</div>
+                  {c.cpf && <div className="mt-0.5 text-xs text-[var(--text-hint)]">CPF: {formatCPF(c.cpf)}</div>}
+                  {c.email && <div className="mt-0.5 text-xs text-[var(--text-hint)]">{c.email}</div>}
+                  <ClienteExtras c={c} />
+                  <div className="mt-2.5 grid grid-cols-2 gap-1.5 border-t border-[var(--border)] pt-2.5">
+                    <div>
+                      <div className="text-[11px] text-[var(--text-hint)]">Perfumes comprados</div>
+                      <div className="mt-[1px] text-[13px] font-medium text-[var(--text)]">{s?.perfumesComprados || 0}</div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-[var(--text-hint)]">Total recebido</div>
+                      <div className="mt-[1px] text-[13px] font-medium" style={{ color: 'var(--green)' }}>
+                        {fmt(s?.totalRecebido || 0)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-1.5 border-t border-[var(--border)] pt-2.5">
+                    <Btn size="sm" className="flex-1" onClick={() => openEdit(c)}>
+                      <IconEdit size={14} /> Editar
+                    </Btn>
+                    <Btn size="sm" variant="danger" onClick={() => handleDelete(c.id)}>
+                      <IconTrash size={14} />
+                    </Btn>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </Card>
