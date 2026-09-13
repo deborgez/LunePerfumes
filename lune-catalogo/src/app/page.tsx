@@ -13,12 +13,20 @@ interface Perfume {
 async function getPerfumes(): Promise<Perfume[]> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const res = await fetch(`${url}/rest/v1/perfumes?select=id,nome,marca,genero,preco&order=nome.asc`, {
-    headers: { apikey: key!, Authorization: `Bearer ${key}` },
-    next: { revalidate },
-  });
-  if (!res.ok) return [];
-  return res.json();
+  if (!url || !key) {
+    console.error('NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY não configuradas.');
+    return [];
+  }
+  try {
+    const res = await fetch(`${url}/rest/v1/perfumes?select=id,nome,marca,genero,preco&order=nome.asc`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+      next: { revalidate },
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
 
 export default async function Home() {
