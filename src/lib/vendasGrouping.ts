@@ -52,6 +52,26 @@ export function statsPorCliente(vendas: Venda[]): Map<number, ClienteStats> {
   return stats;
 }
 
+// Mesma lógica de statsPorCliente, mas agrupando por vendedor.
+export function statsPorVendedor(vendas: Venda[]): Map<number, ClienteStats> {
+  const stats = new Map<number, ClienteStats>();
+  const comprasVistas = new Set<string>();
+
+  for (const v of vendas) {
+    if (v.vendedor_id == null) continue;
+    if (!stats.has(v.vendedor_id)) stats.set(v.vendedor_id, { perfumesComprados: 0, totalRecebido: 0 });
+    const s = stats.get(v.vendedor_id)!;
+
+    const compraKey = chaveDaCompra(v);
+    if (!comprasVistas.has(compraKey)) {
+      comprasVistas.add(compraKey);
+      s.perfumesComprados += v.qty;
+    }
+    if (v.status === 'pago') s.totalRecebido += v.receita_valor || 0;
+  }
+  return stats;
+}
+
 export function agruparPorClienteECompra(vendas: Venda[], perfumes: Perfume[]): ClienteGroup[] {
   const clientesMap = new Map<string, ClienteGroup>();
 

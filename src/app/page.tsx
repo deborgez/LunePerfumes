@@ -6,12 +6,13 @@ import { StatCard, Card, CardHeader } from '@/components/shared/ui';
 import RevenueChart from '@/components/dashboard/RevenueChart';
 import SalesChart from '@/components/dashboard/SalesChart';
 import TopClientes from '@/components/dashboard/TopClientes';
+import TopVendedores from '@/components/dashboard/TopVendedores';
 import { fmt } from '@/lib/format';
 import { GENEROS, GENERO_LABEL } from '@/lib/genero';
 import { contarVendasDistintas } from '@/lib/vendasGrouping';
 
 export default function DashboardPage() {
-  const { vendas, perfumes, clientes, lancamentos } = useData();
+  const { vendas, perfumes, clientes, vendedores, lancamentos } = useData();
   const porGenero = GENEROS.map((g) => ({
     genero: g,
     label: GENERO_LABEL[g],
@@ -79,10 +80,16 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader title="Top clientes" icon={<IconCrown size={17} />} />
-        <TopClientes clientes={clientes} vendas={vendas} />
-      </Card>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <Card>
+          <CardHeader title="Top clientes" icon={<IconCrown size={17} />} />
+          <TopClientes clientes={clientes} vendas={vendas} />
+        </Card>
+        <Card>
+          <CardHeader title="Top vendedores" icon={<IconCrown size={17} />} />
+          <TopVendedores vendedores={vendedores} vendas={vendas} />
+        </Card>
+      </div>
     </div>
   );
 }
