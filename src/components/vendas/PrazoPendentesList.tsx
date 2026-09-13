@@ -1,50 +1,8 @@
 import { Btn, Badge } from '@/components/shared/ui';
 import { IconCash } from '@tabler/icons-react';
 import { fd, fmt } from '@/lib/format';
+import { agruparPorClienteECompra } from '@/lib/vendasGrouping';
 import type { Perfume, Venda } from '@/lib/types';
-
-interface CompraGroup {
-  key: string;
-  perfumeNome: string;
-  qty: number;
-  parcelaTotal: number | null;
-  itens: Venda[];
-}
-
-interface ClienteGroup {
-  key: string;
-  clienteNome: string;
-  compras: CompraGroup[];
-}
-
-function agrupar(pendentes: Venda[], perfumes: Perfume[]): ClienteGroup[] {
-  const clientesMap = new Map<string, ClienteGroup>();
-
-  for (const v of pendentes) {
-    const clienteKey = v.cliente_id != null ? `id:${v.cliente_id}` : `nome:${v.cliente || '—'}`;
-    if (!clientesMap.has(clienteKey)) {
-      clientesMap.set(clienteKey, { key: clienteKey, clienteNome: v.cliente || '—', compras: [] });
-    }
-    const clienteGroup = clientesMap.get(clienteKey)!;
-
-    const compraKey = `${v.perf_id}|${v.parcela_total ?? 'unica'}|${v.data}`;
-    let compra = clienteGroup.compras.find((c) => c.key === compraKey);
-    if (!compra) {
-      const p = perfumes.find((p) => p.id === v.perf_id);
-      compra = { key: compraKey, perfumeNome: p ? p.nome : '—', qty: v.qty, parcelaTotal: v.parcela_total, itens: [] };
-      clienteGroup.compras.push(compra);
-    }
-    compra.itens.push(v);
-  }
-
-  const clientes = [...clientesMap.values()];
-  clientes.forEach((c) => {
-    c.compras.forEach((compra) => compra.itens.sort((a, b) => (a.parcela_num || 0) - (b.parcela_num || 0)));
-    c.compras.sort((a, b) => (a.itens[0]?.venc || '').localeCompare(b.itens[0]?.venc || ''));
-  });
-  clientes.sort((a, b) => a.clienteNome.localeCompare(b.clienteNome, 'pt-BR'));
-  return clientes;
-}
 
 export default function PrazoPendentesList({
   vendas,
@@ -59,7 +17,7 @@ export default function PrazoPendentesList({
   if (!pendentes.length) {
     return <p className="py-2 text-[13px] text-[var(--text-hint)]">Nenhuma conta pendente.</p>;
   }
-  const clientes = agrupar(pendentes, perfumes);
+  const clientes = agruparPorClienteECompra(pendentes, perfumes);
 
   return (
     <div>

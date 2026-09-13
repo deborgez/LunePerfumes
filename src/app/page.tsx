@@ -9,6 +9,7 @@ import StockBars from '@/components/dashboard/StockBars';
 import { fmt } from '@/lib/format';
 import { ESSENCIA_ESTOQUE_REF, sortByEstoqueAsc } from '@/lib/business';
 import { GENEROS, GENERO_LABEL } from '@/lib/genero';
+import { contarVendasDistintas } from '@/lib/vendasGrouping';
 
 export default function DashboardPage() {
   const { vendas, essencias, insumos, perfumes, lancamentos } = useData();
@@ -56,7 +57,7 @@ export default function DashboardPage() {
           color="amber"
         />
         <StatCard label="Lucro" value={fmt(lu)} icon={<IconTrendingUp size={14} />} sub="vendas pagas" color="purple" />
-        <StatCard label="Faturamento" value={fmt(tot)} icon={<IconChartBar size={14} />} sub={`${vendas.length} vendas`} />
+        <StatCard label="Faturamento" value={fmt(tot)} icon={<IconChartBar size={14} />} sub={`${contarVendasDistintas(vendas)} vendas`} />
       </div>
 
       <Card className="mb-3.5">
