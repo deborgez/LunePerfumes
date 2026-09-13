@@ -99,10 +99,10 @@ export async function gerarEtiquetaPng(clienteNome: string, perfumeNome: string)
   const f3 = ajustarFonte(ctx, linha3, larguraTexto, TAMANHO_FONTE_PX, 'italic 300');
   const f4 = ajustarFonte(ctx, linha4, larguraTexto, TAMANHO_FONTE_PX, '700');
 
-  const y1 = h * 0.22;
-  const y2 = h * 0.36;
-  const y3 = h * 0.5;
-  const y4 = h * 0.64;
+  const y1 = h * 0.29;
+  const y2 = h * 0.43;
+  const y3 = h * 0.57;
+  const y4 = h * 0.71;
 
   ctx.font = `italic 300 ${f1}px ${FONTE_FALLBACK}`;
   ctx.fillText(linha1, padEsq, y1, larguraTexto);
