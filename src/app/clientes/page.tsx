@@ -5,6 +5,7 @@ import { IconUsers, IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
 import { useData } from '@/context/DataContext';
 import { Btn, Card, CardHeader, formatCPF, formatPhoneBR } from '@/components/shared/ui';
 import ClienteModal from '@/components/clientes/ClienteModal';
+import ClienteComprasModal from '@/components/clientes/ClienteComprasModal';
 import { fmt } from '@/lib/format';
 import { statsPorCliente } from '@/lib/vendasGrouping';
 import type { Cliente } from '@/lib/types';
@@ -19,9 +20,10 @@ function ClienteExtras({ c }: { c: Cliente }) {
 }
 
 export default function ClientesPage() {
-  const { clientes, vendas, deleteCliente } = useData();
+  const { clientes, vendas, perfumes, deleteCliente } = useData();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Cliente | null>(null);
+  const [comprasCliente, setComprasCliente] = useState<Cliente | null>(null);
   const stats = statsPorCliente(vendas);
 
   function openNew() {
@@ -77,7 +79,11 @@ export default function ClientesPage() {
                 clientes.map((c) => {
                   const s = stats.get(c.id);
                   return (
-                    <tr key={c.id} className="border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]">
+                    <tr
+                      key={c.id}
+                      className="cursor-pointer border-b border-[var(--tbl-border)] last:border-0 hover:bg-[var(--tbl-hover)]"
+                      onClick={() => setComprasCliente(c)}
+                    >
                       <td className="px-3 py-2.5 text-[var(--text)]">
                         <strong>{c.nome}</strong>
                         <ClienteExtras c={c} />
@@ -89,7 +95,7 @@ export default function ClientesPage() {
                       <td className="px-3 py-2.5 font-medium" style={{ color: 'var(--green)' }}>
                         {fmt(s?.totalRecebido || 0)}
                       </td>
-                      <td className="px-3 py-2.5">
+                      <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-1.5">
                           <Btn size="xs" onClick={() => openEdit(c)}>
                             <IconEdit size={14} />
@@ -115,7 +121,11 @@ export default function ClientesPage() {
             clientes.map((c) => {
               const s = stats.get(c.id);
               return (
-                <div key={c.id} className="mb-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-[var(--shadow)]">
+                <div
+                  key={c.id}
+                  className="mb-2.5 cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-[var(--shadow)]"
+                  onClick={() => setComprasCliente(c)}
+                >
                   <div className="text-sm font-semibold text-[var(--text)]">{c.nome}</div>
                   <div className="mt-[3px] text-xs text-[var(--text-muted)]">{c.telefone ? formatPhoneBR(c.telefone) : 'Sem telefone'}</div>
                   {c.cpf && <div className="mt-0.5 text-xs text-[var(--text-hint)]">CPF: {formatCPF(c.cpf)}</div>}
@@ -133,7 +143,7 @@ export default function ClientesPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 flex gap-1.5 border-t border-[var(--border)] pt-2.5">
+                  <div className="mt-3 flex gap-1.5 border-t border-[var(--border)] pt-2.5" onClick={(e) => e.stopPropagation()}>
                     <Btn size="sm" className="flex-1" onClick={() => openEdit(c)}>
                       <IconEdit size={14} /> Editar
                     </Btn>
@@ -149,6 +159,7 @@ export default function ClientesPage() {
       </Card>
 
       <ClienteModal open={modalOpen} onClose={() => setModalOpen(false)} editing={editing} />
+      <ClienteComprasModal cliente={comprasCliente} vendas={vendas} perfumes={perfumes} onClose={() => setComprasCliente(null)} />
     </div>
   );
 }
