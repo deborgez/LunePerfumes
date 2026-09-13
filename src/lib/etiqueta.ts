@@ -35,7 +35,7 @@ export function gerarEtiquetaPng(clienteNome: string, perfumeNome: string): Prom
 
   const linha1 = 'Produzido e envazado especialmente para';
   const linha2 = clienteNome.trim() || 'Cliente';
-  const linha3 = `Inspirado ${perfumeNome}`.trim();
+  const linha3 = `Fragrância inspirada no ${perfumeNome}`.trim();
 
   const f1 = ajustarFonte(ctx, linha1, larguraMax, Math.round(h * 0.16), familia);
   const f2 = ajustarFonte(ctx, linha2, larguraMax, Math.round(h * 0.22), familia);
