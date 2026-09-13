@@ -34,6 +34,21 @@ function garantirFonteCarregada(): Promise<void> {
   return fontesCarregadas;
 }
 
+const BG_URL = '/etiqueta-bg-lune.png';
+let bgCarregado: Promise<HTMLImageElement | null> | null = null;
+
+function carregarImagemFundo(): Promise<HTMLImageElement | null> {
+  if (!bgCarregado) {
+    bgCarregado = new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = BG_URL;
+    });
+  }
+  return bgCarregado;
+}
+
 // A fonte Panton (versão trial) não tem os glifos acentuados do português —
 // letras como "â"/"ç"/"ã" saem como caractere quebrado. Removemos os acentos
 // do texto renderizado para evitar isso.
@@ -52,7 +67,7 @@ function ajustarFonte(ctx: CanvasRenderingContext2D, texto: string, larguraMax: 
 }
 
 export async function gerarEtiquetaPng(clienteNome: string, perfumeNome: string): Promise<Blob> {
-  await garantirFonteCarregada();
+  const [, bg] = await Promise.all([garantirFonteCarregada(), carregarImagemFundo()]);
 
   const w = MM_TO_PX(LARGURA_MM);
   const h = MM_TO_PX(ALTURA_MM);
@@ -63,6 +78,7 @@ export async function gerarEtiquetaPng(clienteNome: string, perfumeNome: string)
 
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
+  if (bg) ctx.drawImage(bg, 0, 0, w, h);
   ctx.fillStyle = '#000000';
   ctx.textBaseline = 'middle';
 
@@ -99,14 +115,6 @@ export async function gerarEtiquetaPng(clienteNome: string, perfumeNome: string)
 
   ctx.font = `700 ${f4}px ${FONTE_FALLBACK}`;
   ctx.fillText(linha4, padEsq, y4, larguraTexto);
-
-  // Logo fixa "LUNE" (LU / NE empilhado), alinhada à direita.
-  ctx.textAlign = 'right';
-  const xLogo = w - padDir;
-  const fLogo = Math.round(h * 0.32);
-  ctx.font = `700 ${fLogo}px ${FONTE_FALLBACK}`;
-  ctx.fillText('LU', xLogo, h * 0.36);
-  ctx.fillText('NE', xLogo, h * 0.68);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
