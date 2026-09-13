@@ -8,6 +8,7 @@ import { useData } from '@/context/DataContext';
 import { useToast } from '@/context/ToastContext';
 import { gi, receitaOf } from '@/lib/business';
 import { fmt } from '@/lib/format';
+import { baixarEtiqueta } from '@/lib/etiqueta';
 
 export default function VendaForm() {
   const { perfumes, essencias, insumos, clientes, vender } = useData();
@@ -50,7 +51,7 @@ export default function VendaForm() {
       toast('Selecione um perfume', 'err');
       return;
     }
-    if (tipo === 'prazo' && !clienteId) {
+    if (!clienteId) {
       toast('Selecione o cliente', 'err');
       return;
     }
@@ -72,6 +73,13 @@ export default function VendaForm() {
     });
     setSaving(false);
     if (ok) {
+      if (p) {
+        try {
+          await baixarEtiqueta(cli?.nome || '', p.nome);
+        } catch {
+          toast('Venda registrada, mas falhou ao gerar a etiqueta', 'err');
+        }
+      }
       setQty('1');
       setClienteId('');
       setVenc('');
@@ -113,7 +121,7 @@ export default function VendaForm() {
       </div>
 
       <div className="mb-2.5">
-        <FormGroup label={tipo === 'prazo' ? 'Cliente' : 'Cliente (opcional)'}>
+        <FormGroup label="Cliente">
           {!clientes.length ? (
             <Select disabled value="">
               <option value="">— Cadastre clientes primeiro —</option>
