@@ -130,17 +130,17 @@ export default function CatalogoClient({ perfumes }: { perfumes: Perfume[] }) {
                         {itens.map((p) => (
                           <li key={p.id} className="item-row">
                             <span className="item-main">
-                              <span className="item-name">{p.nome}</span>
+                              <span className="item-name">
+                                <span className={`item-genero item-genero--${p.genero}`} title={GENERO_LABEL[p.genero]}>
+                                  {GENERO_INITIAL[p.genero]}
+                                </span>
+                                {p.nome}
+                              </span>
                               <span className="item-meta">
                                 100ml{p.tipo ? ` · ${p.tipo}` : ''}
                               </span>
                             </span>
-                            <span className="item-side">
-                              <span className="item-price">R$ {fmtPreco(p.preco)}</span>
-                              <span className={`item-genero item-genero--${p.genero}`} title={GENERO_LABEL[p.genero]}>
-                                {GENERO_INITIAL[p.genero]}
-                              </span>
-                            </span>
+                            <span className="item-price">R$ {fmtPreco(p.preco)}</span>
                           </li>
                         ))}
                       </ul>

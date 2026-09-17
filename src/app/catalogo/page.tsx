@@ -141,8 +141,7 @@ export default function CatalogoPage() {
         .catalogo-page .item-name { font-size: 14.5px; font-weight: 500; }
         .catalogo-page .item-meta { font-size: 11.5px; color: var(--muted); }
         .catalogo-page .item-price { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
-        .catalogo-page .item-side { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-        .catalogo-page .item-genero { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 999px; font-size: 9.5px; font-weight: 700; color: white; }
+        .catalogo-page .item-genero { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 999px; font-size: 9px; font-weight: 700; color: white; margin-right: 6px; position: relative; top: -1px; }
         .catalogo-page .item-genero--feminino { background: var(--fem); }
         .catalogo-page .item-genero--masculino { background: var(--masc); }
         .catalogo-page .item-genero--compartilhavel { background: var(--unis); }
@@ -213,17 +212,17 @@ export default function CatalogoPage() {
                         {itens.map((p) => (
                           <li key={p.id} className="item-row">
                             <span className="item-main">
-                              <span className="item-name">{p.nome}</span>
+                              <span className="item-name">
+                                <span className={`item-genero item-genero--${p.genero}`} title={GENERO_LABEL[p.genero]}>
+                                  {GENERO_INITIAL[p.genero]}
+                                </span>
+                                {p.nome}
+                              </span>
                               <span className="item-meta">
                                 100ml{p.tipo ? ` · ${p.tipo}` : ''}
                               </span>
                             </span>
-                            <span className="item-side">
-                              <span className="item-price">R$ {fmtPreco(p.preco)}</span>
-                              <span className={`item-genero item-genero--${p.genero}`} title={GENERO_LABEL[p.genero]}>
-                                {GENERO_INITIAL[p.genero]}
-                              </span>
-                            </span>
+                            <span className="item-price">R$ {fmtPreco(p.preco)}</span>
                           </li>
                         ))}
                       </ul>
