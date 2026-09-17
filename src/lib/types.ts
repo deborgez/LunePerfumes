@@ -46,6 +46,7 @@ export interface Perfume {
   ml: number;
   preco: number;
   receita: ReceitaItem[];
+  tipo?: string | null;
   created_at?: string;
 }
 

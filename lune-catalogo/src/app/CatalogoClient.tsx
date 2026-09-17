@@ -10,6 +10,7 @@ interface Perfume {
   marca: string | null;
   genero: Genero;
   preco: number;
+  tipo: string | null;
 }
 
 const GENERO_LABEL: Record<Genero, string> = {
@@ -77,7 +78,8 @@ export default function CatalogoClient({ perfumes }: { perfumes: Perfume[] }) {
             </span>
             <span className="tagline">Catálogo</span>
           </div>
-          <p className="subhead">Fragrâncias inspiradas nas grandes casas de perfumaria — {perfumes.length} opções.</p>
+          <p className="subhead">Fragrâncias inspiradas nas grandes casas de perfumaria — {perfumes.length} opções, frascos de 100ml.</p>
+          <p className="top-note">⏳ Prazo de produção: até 25 dias</p>
           <div className="controls">
             <label className="search">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -122,7 +124,12 @@ export default function CatalogoClient({ perfumes }: { perfumes: Perfume[] }) {
                       <ul className="item-list">
                         {itens.map((p) => (
                           <li key={p.id} className="item-row">
-                            <span className="item-name">{p.nome}</span>
+                            <span className="item-main">
+                              <span className="item-name">{p.nome}</span>
+                              <span className="item-meta">
+                                100ml{p.tipo ? ` · ${p.tipo}` : ''}
+                              </span>
+                            </span>
                             <span className="item-price">R$ {fmtPreco(p.preco)}</span>
                           </li>
                         ))}
@@ -136,7 +143,9 @@ export default function CatalogoClient({ perfumes }: { perfumes: Perfume[] }) {
         </main>
       </div>
 
-      <footer>Lune Perfumes · preços sujeitos a alteração sem aviso prévio</footer>
+      <footer>
+        Lune Perfumes · preços sujeitos a alteração sem aviso prévio
+      </footer>
     </div>
   );
 }

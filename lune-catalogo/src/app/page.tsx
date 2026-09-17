@@ -8,6 +8,7 @@ interface Perfume {
   marca: string | null;
   genero: 'feminino' | 'masculino' | 'compartilhavel';
   preco: number;
+  tipo: string | null;
 }
 
 async function getPerfumes(): Promise<Perfume[]> {
@@ -18,7 +19,7 @@ async function getPerfumes(): Promise<Perfume[]> {
     return [];
   }
   try {
-    const res = await fetch(`${url}/rest/v1/perfumes?select=id,nome,marca,genero,preco&order=nome.asc`, {
+    const res = await fetch(`${url}/rest/v1/perfumes?select=id,nome,marca,genero,preco,tipo&order=nome.asc`, {
       headers: { apikey: key, Authorization: `Bearer ${key}` },
       next: { revalidate },
     });

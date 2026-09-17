@@ -106,7 +106,8 @@ export default function CatalogoPage() {
         .catalogo-page .wordmark .logo { font-family: 'Panton', var(--font-work-sans), Arial, sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.02em; text-transform: uppercase; }
         .catalogo-page .wordmark .sub { font-weight: 700; font-size: 15px; color: var(--muted); letter-spacing: 0.02em; }
         .catalogo-page .tagline { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; }
-        .catalogo-page .subhead { color: var(--muted); font-size: 14px; margin: 2px 0 16px; }
+        .catalogo-page .subhead { color: var(--muted); font-size: 14px; margin: 2px 0 8px; }
+        .catalogo-page .top-note { display: inline-block; background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; padding: 6px 12px; border-radius: 8px; margin: 0 0 16px; }
         .catalogo-page .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .catalogo-page .search { flex: 1 1 220px; display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
         .catalogo-page .search svg { flex: none; color: var(--muted); }
@@ -130,7 +131,9 @@ export default function CatalogoPage() {
         .catalogo-page .item-row { display: flex; align-items: baseline; gap: 10px; padding: 9px 4px; border-bottom: 1px solid var(--line); }
         .catalogo-page .item-row:last-child { border-bottom: none; }
         .catalogo-page .item-row:hover { background: var(--surface-2); margin: 0 -8px; padding: 9px 8px; border-radius: 6px; }
-        .catalogo-page .item-name { flex: 1; font-size: 14.5px; font-weight: 500; }
+        .catalogo-page .item-main { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+        .catalogo-page .item-name { font-size: 14.5px; font-weight: 500; }
+        .catalogo-page .item-meta { font-size: 11.5px; color: var(--muted); }
         .catalogo-page .item-price { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
         .catalogo-page .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
         .catalogo-page footer { max-width: 760px; margin: 0 auto; padding: 24px 20px 40px; text-align: center; color: var(--muted); font-size: 12px; }
@@ -150,7 +153,8 @@ export default function CatalogoPage() {
             </span>
             <span className="tagline">Catálogo</span>
           </div>
-          <p className="subhead">Fragrâncias inspiradas nas grandes casas de perfumaria — {perfumes.length} opções.</p>
+          <p className="subhead">Fragrâncias inspiradas nas grandes casas de perfumaria — {perfumes.length} opções, frascos de 100ml.</p>
+          <p className="top-note">⏳ Prazo de produção: até 25 dias</p>
           <div className="controls">
             <label className="search">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -197,7 +201,12 @@ export default function CatalogoPage() {
                       <ul className="item-list">
                         {itens.map((p) => (
                           <li key={p.id} className="item-row">
-                            <span className="item-name">{p.nome}</span>
+                            <span className="item-main">
+                              <span className="item-name">{p.nome}</span>
+                              <span className="item-meta">
+                                100ml{p.tipo ? ` · ${p.tipo}` : ''}
+                              </span>
+                            </span>
                             <span className="item-price">R$ {fmtPreco(p.preco)}</span>
                           </li>
                         ))}
