@@ -18,6 +18,11 @@ const GENERO_LABEL: Record<Genero, string> = {
   masculino: 'Masculino',
   compartilhavel: 'Compartilhável',
 };
+const GENERO_INITIAL: Record<Genero, string> = {
+  feminino: 'F',
+  masculino: 'M',
+  compartilhavel: 'C',
+};
 const GENERO_ORDER: Genero[] = ['feminino', 'masculino', 'compartilhavel'];
 
 type GeneroFiltro = Genero | 'all';
@@ -130,7 +135,12 @@ export default function CatalogoClient({ perfumes }: { perfumes: Perfume[] }) {
                                 100ml{p.tipo ? ` · ${p.tipo}` : ''}
                               </span>
                             </span>
-                            <span className="item-price">R$ {fmtPreco(p.preco)}</span>
+                            <span className="item-side">
+                              <span className="item-price">R$ {fmtPreco(p.preco)}</span>
+                              <span className={`item-genero item-genero--${p.genero}`} title={GENERO_LABEL[p.genero]}>
+                                {GENERO_INITIAL[p.genero]}
+                              </span>
+                            </span>
                           </li>
                         ))}
                       </ul>

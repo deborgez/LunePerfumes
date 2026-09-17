@@ -9,6 +9,11 @@ const GENERO_LABEL: Record<Genero, string> = {
   masculino: 'Masculino',
   compartilhavel: 'Compartilhável',
 };
+const GENERO_INITIAL: Record<Genero, string> = {
+  feminino: 'F',
+  masculino: 'M',
+  compartilhavel: 'C',
+};
 const GENERO_ORDER: Genero[] = ['feminino', 'masculino', 'compartilhavel'];
 
 type GeneroFiltro = Genero | 'all';
@@ -136,6 +141,11 @@ export default function CatalogoPage() {
         .catalogo-page .item-name { font-size: 14.5px; font-weight: 500; }
         .catalogo-page .item-meta { font-size: 11.5px; color: var(--muted); }
         .catalogo-page .item-price { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+        .catalogo-page .item-side { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+        .catalogo-page .item-genero { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 999px; font-size: 9.5px; font-weight: 700; color: white; }
+        .catalogo-page .item-genero--feminino { background: var(--fem); }
+        .catalogo-page .item-genero--masculino { background: var(--masc); }
+        .catalogo-page .item-genero--compartilhavel { background: var(--unis); }
         .catalogo-page .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
         .catalogo-page footer { max-width: 760px; margin: 0 auto; padding: 24px 20px 40px; text-align: center; color: var(--muted); font-size: 12px; }
         @media (max-width: 480px) {
@@ -208,7 +218,12 @@ export default function CatalogoPage() {
                                 100ml{p.tipo ? ` · ${p.tipo}` : ''}
                               </span>
                             </span>
-                            <span className="item-price">R$ {fmtPreco(p.preco)}</span>
+                            <span className="item-side">
+                              <span className="item-price">R$ {fmtPreco(p.preco)}</span>
+                              <span className={`item-genero item-genero--${p.genero}`} title={GENERO_LABEL[p.genero]}>
+                                {GENERO_INITIAL[p.genero]}
+                              </span>
+                            </span>
                           </li>
                         ))}
                       </ul>
