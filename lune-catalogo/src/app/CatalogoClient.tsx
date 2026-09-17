@@ -119,7 +119,7 @@ export default function CatalogoClient({ perfumes }: { perfumes: Perfume[] }) {
                     <span className="genero-count">{sec.itens.length} fragrâncias</span>
                   </div>
                   {sec.marcas.map(([marca, itens]) => (
-                    <div key={marca}>
+                    <div key={marca} className="brand-group">
                       <h3 className="brand-name">{marca}</h3>
                       <ul className="item-list">
                         {itens.map((p) => (

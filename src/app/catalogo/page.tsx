@@ -126,7 +126,8 @@ export default function CatalogoPage() {
         .catalogo-page .g-feminino .genero-head { border-bottom-color: var(--fem); }
         .catalogo-page .g-masculino .genero-head { border-bottom-color: var(--masc); }
         .catalogo-page .g-compartilhavel .genero-head { border-bottom-color: var(--unis); }
-        .catalogo-page .brand-name { font-family: var(--font-work-sans), sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent-soft); display: inline-block; padding: 3px 9px; border-radius: 5px; margin: 18px 0 6px; }
+        .catalogo-page .brand-group { border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 4px; margin: 0 0 16px; }
+        .catalogo-page .brand-name { font-family: var(--font-work-sans), sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent-soft); display: inline-block; padding: 3px 9px; border-radius: 5px; margin: 0 0 6px; }
         .catalogo-page .item-list { list-style: none; margin: 0; padding: 0; }
         .catalogo-page .item-row { display: flex; align-items: baseline; gap: 10px; padding: 9px 4px; border-bottom: 1px solid var(--line); }
         .catalogo-page .item-row:last-child { border-bottom: none; }
@@ -196,7 +197,7 @@ export default function CatalogoPage() {
                     <span className="genero-count">{sec.itens.length} fragrâncias</span>
                   </div>
                   {sec.marcas.map(([marca, itens]) => (
-                    <div key={marca}>
+                    <div key={marca} className="brand-group">
                       <h3 className="brand-name">{marca}</h3>
                       <ul className="item-list">
                         {itens.map((p) => (
