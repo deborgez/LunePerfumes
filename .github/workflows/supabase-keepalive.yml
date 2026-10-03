@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 12 */2 * *'
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/supabase-keepalive.yml'
 
 env:
   SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtrZmdpaWptdXl1Y3JvanlzbnNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2OTgxMDQsImV4cCI6MjEwMTI3NDEwNH0.kJL7v6_ikYfIGkijLlvvV71AG908L0FYSJMjw9-oukg
